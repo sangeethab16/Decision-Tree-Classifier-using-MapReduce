@@ -1,7 +1,6 @@
 package classification;
 
 import java.io.IOException;
-import java.util.StringTokenizer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -21,31 +20,34 @@ import org.apache.log4j.Logger;
 public class DataPreparation extends Configured implements Tool {
 	private static final Logger logger = LogManager.getLogger(DataPreparation.class);
 
-	public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable> {
+	public static class AttributeMapper extends Mapper<Object, Text, Text, Text> {
 		private final static IntWritable one = new IntWritable(1);
 		private final Text word = new Text();
 
 		@Override
 		public void map(final Object key, final Text value, final Context context) throws IOException, InterruptedException {
-			final StringTokenizer itr = new StringTokenizer(value.toString());
-			while (itr.hasMoreTokens()) {
-				word.set(itr.nextToken());
-				context.write(word, one);
+			String[] tokens = value.toString().split(",");
+			int rowId = Integer.parseInt(tokens[0]);
+			String className = tokens[tokens.length - 1];
+			for(int i= 1; i < tokens.length - 1; i++) {
+				context.write(new Text(tokens[i]), new Text(rowId + "," + className));
 			}
 		}
 	}
 
-	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+	public static class AttributeReducer extends Reducer<Text, Text, Text, Text> {
 		private final IntWritable result = new IntWritable();
 
 		@Override
-		public void reduce(final Text key, final Iterable<IntWritable> values, final Context context) throws IOException, InterruptedException {
-			int sum = 0;
-			for (final IntWritable val : values) {
-				sum += val.get();
+		public void reduce(final Text key, final Iterable<Text> values, final Context context) throws IOException, InterruptedException {
+			int cnt = 0;
+
+			for(Text value: values) {
+				cnt += 1;
 			}
-			result.set(sum);
-			context.write(key, result);
+
+			result.set(cnt);
+			context.write(key, new Text(cnt));
 		}
 	}
 
@@ -62,11 +64,11 @@ public class DataPreparation extends Configured implements Tool {
 //			fileSystem.delete(new Path(args[1]), true);
 //		}
 		// ================
-		job.setMapperClass(TokenizerMapper.class);
-		job.setCombinerClass(IntSumReducer.class);
-		job.setReducerClass(IntSumReducer.class);
+		job.setMapperClass(AttributeMapper.class);
+//		job.setCombinerClass(AttributeReducer.class);
+		job.setReducerClass(AttributeReducer.class);
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(IntWritable.class);
+		job.setOutputValueClass(Text.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		return job.waitForCompletion(true) ? 0 : 1;
