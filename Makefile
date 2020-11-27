@@ -5,7 +5,7 @@
 hadoop.root=/home/prajaktarods/hadoop-3.2.1
 jar.name=mr-demo-1.0.jar
 jar.path=target/${jar.name}
-job.name=wc.WordCount
+job.name=wc.DataPreparation
 local.input=input
 local.output=output
 # Pseudo-Cluster Execution

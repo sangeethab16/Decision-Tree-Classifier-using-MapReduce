@@ -1,4 +1,4 @@
-package wc;
+package classification;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -18,8 +18,8 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-public class WordCount extends Configured implements Tool {
-	private static final Logger logger = LogManager.getLogger(WordCount.class);
+public class DataPreparation extends Configured implements Tool {
+	private static final Logger logger = LogManager.getLogger(DataPreparation.class);
 
 	public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable> {
 		private final static IntWritable one = new IntWritable(1);
@@ -53,7 +53,7 @@ public class WordCount extends Configured implements Tool {
 	public int run(final String[] args) throws Exception {
 		final Configuration conf = getConf();
 		final Job job = Job.getInstance(conf, "Word Count");
-		job.setJarByClass(WordCount.class);
+		job.setJarByClass(DataPreparation.class);
 		final Configuration jobConf = job.getConfiguration();
 		jobConf.set("mapreduce.output.textoutputformat.separator", "\t");
 		// Delete output directory, only to ease local development; will not work on AWS. ===========
@@ -78,7 +78,7 @@ public class WordCount extends Configured implements Tool {
 		}
 
 		try {
-			ToolRunner.run(new WordCount(), args);
+			ToolRunner.run(new DataPreparation(), args);
 		} catch (final Exception e) {
 			logger.error("", e);
 		}
