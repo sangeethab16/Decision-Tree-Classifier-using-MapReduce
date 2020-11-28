@@ -2,14 +2,14 @@
 
 # Customize these paths for your environment.
 # -----------------------------------------------------------
-hadoop.root=/home/prajaktarods/hadoop-3.2.1
+hadoop.root=/usr/local/Cellar/hadoop/3.3.0/libexec
 jar.name=mr-demo-1.0.jar
 jar.path=target/${jar.name}
-job.name=wc.DataPreparation
+job.name=classification.AttributeSelectionMapper
 local.input=input
 local.output=output
 # Pseudo-Cluster Execution
-hdfs.user.name=prajaktarods
+hdfs.user.name=maanasak
 hdfs.input=input
 hdfs.output=output
 # AWS EMR Execution
