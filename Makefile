@@ -5,7 +5,7 @@
 hadoop.root=/usr/local/Cellar/hadoop/3.3.0/libexec
 jar.name=mr-demo-1.0.jar
 jar.path=target/${jar.name}
-job.name=classification.AttributeSelectionMapper
+job.name=classification.DataPreparation
 local.input=input
 local.output=output
 # Pseudo-Cluster Execution
