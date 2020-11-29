@@ -26,6 +26,13 @@ public class Driver extends Configured implements Tool {
 		job.setJarByClass(Driver.class);
 		final Configuration jobConf = job.getConfiguration();
 		jobConf.set("mapreduce.output.textoutputformat.separator", ",");
+		//job.setMapperClass(.class);
+		job.setReducerClass(SelectReducer.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(Text.class);
+		FileInputFormat.addInputPath(job, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		return job.waitForCompletion(true) ? 0 : 1;
 	}
 
 	public static void main(final String[] args) {
@@ -39,5 +46,4 @@ public class Driver extends Configured implements Tool {
 			logger.error("", e);
 		}
 	}
-
 }
