@@ -11,12 +11,15 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 
-public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, Text> {
+public class AttributeSelectionMapper extends Mapper<LongWritable, Text, IntWritable, SelectMapperWritable> {
 	Map<Integer, List<InstanceValue>> attributeMetrics ;
 	Float classInfo;
 	
@@ -60,7 +63,7 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, T
 	}
 	
 	@Override
-	public void cleanup(Context context) {
+	public void cleanup(Context context) throws IOException, InterruptedException {
 		
 		List<String> classLabels = new ArrayList<String>();
 		
@@ -78,8 +81,7 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, T
 		
 		
 		for(Map.Entry<Integer, List<InstanceValue>> entry : attributeMetrics.entrySet()) {
-			//System.out.println("Attribute ID : " + entry.getKey());
-			//System.out.println("Attribute Value List : " + entry.getValue().toString());
+			
 			List<InstanceValue> attrValList = entry.getValue();
 			Collections.sort(attrValList, new SortByValue());
 			List<Double> cpList = new ArrayList<Double>();
@@ -88,10 +90,57 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, T
 				cpList.add(Double.sum(attrValList.get(i).getValue(), attrValList.get(i+1).getValue())/2);
 			}
 			
-			//System.out.println("CUT POINT : " + entry.getKey() + " " + cpList.toString());
-			/*for(int i = 0; i< cpList.size(); i++) {
+			Float maxGain = (float) 0.0;
+			Double maxGainCP = 0.0;
+			float split;
+			float ratio = 0;
+			
+			
+			for(int i = 0; i< cpList.size(); i++) {
 				
-			}*/
+				List<InstanceValue> attrValLessCP = new ArrayList<InstanceValue>();
+				List<InstanceValue> attrValGreaterCP = new ArrayList<InstanceValue>();
+				
+				for (Iterator<InstanceValue> iter = attrValList.iterator(); iter.hasNext(); ) {
+					InstanceValue attrVal = iter.next();
+					SortByValue comp = new SortByValue();
+					
+					if(comp.compareToVal(attrVal, cpList.get(i)) <= 0) {
+						
+						attrValLessCP.add(attrVal);
+						
+					} else {
+						
+						attrValGreaterCP.add(attrVal);
+						
+					}
+					
+					
+				}
+				
+				
+				
+				Float gain = infoDataset - ((((float)attrValLessCP.size()/attrValList.size()) * 
+						Helper.infoCalc(uniqueClassLabels, attrValLessCP)) + ((float)(attrValGreaterCP.size()/attrValList.size()) * 
+								Helper.infoCalc(uniqueClassLabels, attrValGreaterCP)));
+				
+				if (gain > maxGain) {
+					maxGain = gain;
+					maxGainCP = cpList.get(i);
+					float prop1 = ((float)attrValLessCP.size()/attrValList.size());
+					float prop2 = ((float)attrValLessCP.size()/attrValList.size());
+					split = (prop1 * (float) (Math.log(prop1) / Math.log(2))) + (prop2 * (float) (Math.log(prop2) / Math.log(2)));
+					split = (float) (split * -1.0);
+					ratio = gain / split;
+				}
+				
+								
+				
+			}
+			context.write(new IntWritable(entry.getKey()), new SelectMapperWritable(new FloatWritable(ratio),new DoubleWritable(maxGainCP)));
+
+			
+			
 			
 		}	
 		

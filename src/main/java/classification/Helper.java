@@ -36,8 +36,15 @@ public class Helper {
 		
 		for (Iterator<String> iter = uniqueClassLabels.iterator(); iter.hasNext(); ) {
 			String classLabel = iter.next();
+			
 			Float prob =  ((float)classCount.get(classLabel)/classLabels.size());
+			
+			if(prob == (float)0.0) {
+				return (float) 0.0;
+			}
+			
 			info = Float.sum(info, prob*(float) (Math.log(prob) / Math.log(2)));
+			
 			
 	    }
 		

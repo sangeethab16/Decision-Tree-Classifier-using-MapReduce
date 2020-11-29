@@ -34,7 +34,7 @@ public class DataPreparation extends Configured implements Tool {
 		//job.setCombinerClass(IntSumReducer.class);
 		//job.setReducerClass(IntSumReducer.class);
 		job.setOutputKeyClass(IntWritable.class);
-		job.setOutputValueClass(Text.class);
+		job.setOutputValueClass(SelectMapperWritable.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		return job.waitForCompletion(true) ? 0 : 1;

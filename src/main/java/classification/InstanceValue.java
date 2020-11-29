@@ -54,4 +54,13 @@ class SortByValue implements Comparator<InstanceValue>
         if (o1.getValue() > o2.getValue()) return 1;
         return 0;
 	} 
+	
+	public int compareToVal(InstanceValue o1, Double val) {
+		
+		if (o1.getValue() < val) return -1;
+        if (o1.getValue() > val) return 1;
+        return 0;
+	} 
+	
+	
 } 
