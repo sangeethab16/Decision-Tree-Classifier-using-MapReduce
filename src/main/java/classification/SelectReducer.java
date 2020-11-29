@@ -4,7 +4,6 @@ import classification.utility.RatioCutPoint;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
@@ -12,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 //input is of the form key = Ak, [(Xj/Ak, CutPoint Xj), (Xj+1/Ak, CutPoint Xj+1), (Xj+2/Ak, CutPoint Xj+2)]
-public class SelectReducer extends Reducer<IntWritable, SelectMapperWritable, IntWritable, DoubleWritable> {
+public class SelectReducer extends Reducer<IntWritable, SelectMapperWritable, IntWritable, SelectMapperWritable> {
 
     Map<Integer, RatioCutPoint> ratioCutPointMap = new HashMap<>();
 
@@ -47,9 +46,12 @@ public class SelectReducer extends Reducer<IntWritable, SelectMapperWritable, In
             }
         }
         IntWritable key = new IntWritable(selectedAttribute);
-        DoubleWritable value = new DoubleWritable(selectedAttributeCutPoint);
-
-        context.write(key, value);
+        DoubleWritable value1 = new DoubleWritable(selectedAttributeCutPoint);
+        FloatWritable value2 = new FloatWritable(maxRatio);
+        SelectMapperWritable selectMapperWritable = new SelectMapperWritable(value2, value1);
+//        context.write(key, selectMapperWritable);
+        context.getConfiguration().set("selectedAttributeCutPoint", selectedAttributeCutPoint + "");
+        context.getConfiguration().set("selectedAttribute", selectedAttribute + "");
     }
 
 }
