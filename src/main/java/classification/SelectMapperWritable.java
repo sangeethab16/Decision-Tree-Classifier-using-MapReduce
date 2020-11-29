@@ -58,4 +58,3 @@ public class SelectMapperWritable implements Writable {
         return ratio + "," + attributeValue;
     }
 }
-
