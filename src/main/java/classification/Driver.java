@@ -26,7 +26,7 @@ public class Driver extends Configured implements Tool {
 		job.setJarByClass(Driver.class);
 		final Configuration jobConf = job.getConfiguration();
 		jobConf.set("mapreduce.output.textoutputformat.separator", ",");
-		//job.setMapperClass(.class);
+		job.setMapperClass(AttributeSelectionMapper.class);
 		job.setReducerClass(SelectReducer.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
