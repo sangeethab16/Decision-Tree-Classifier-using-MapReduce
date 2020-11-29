@@ -6,11 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 
-public class AttributeSelectionMapper extends Mapper<Object, Text, Text, Text> {
+public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, Text> {
 	Map<Integer, List<Double>> attributeMetrics ;
 	
 	@Override
@@ -22,7 +23,11 @@ public class AttributeSelectionMapper extends Mapper<Object, Text, Text, Text> {
 	}
 	
 	@Override
-	public void map(final Object key, final Text instance, final Context context) throws IOException, InterruptedException{
+	public void map(final LongWritable key, final Text instance, final Context context) throws IOException, InterruptedException{
+		
+		if(key.get() == 0) {
+			return;
+		}
 		
 		String[] instanceValues = instance.toString().split(",");
 		

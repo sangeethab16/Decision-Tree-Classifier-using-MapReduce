@@ -21,52 +21,20 @@ import org.apache.log4j.Logger;
 public class DataPreparation extends Configured implements Tool {
 	private static final Logger logger = LogManager.getLogger(DataPreparation.class);
 
-	public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable> {
-		private final static IntWritable one = new IntWritable(1);
-		private final Text word = new Text();
-
-		@Override
-		public void map(final Object key, final Text value, final Context context) throws IOException, InterruptedException {
-			final StringTokenizer itr = new StringTokenizer(value.toString());
-			while (itr.hasMoreTokens()) {
-				word.set(itr.nextToken());
-				context.write(word, one);
-			}
-		}
-	}
-
-	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
-		private final IntWritable result = new IntWritable();
-
-		@Override
-		public void reduce(final Text key, final Iterable<IntWritable> values, final Context context) throws IOException, InterruptedException {
-			int sum = 0;
-			for (final IntWritable val : values) {
-				sum += val.get();
-			}
-			result.set(sum);
-			context.write(key, result);
-		}
-	}
-
+	
 	@Override
 	public int run(final String[] args) throws Exception {
 		final Configuration conf = getConf();
 		final Job job = Job.getInstance(conf, "Word Count");
 		job.setJarByClass(DataPreparation.class);
 		final Configuration jobConf = job.getConfiguration();
-		jobConf.set("mapreduce.output.textoutputformat.separator", "\t");
-		// Delete output directory, only to ease local development; will not work on AWS. ===========
-//		final FileSystem fileSystem = FileSystem.get(conf);
-//		if (fileSystem.exists(new Path(args[1]))) {
-//			fileSystem.delete(new Path(args[1]), true);
-//		}
-		// ================
-		job.setMapperClass(TokenizerMapper.class);
-		job.setCombinerClass(IntSumReducer.class);
-		job.setReducerClass(IntSumReducer.class);
-		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(IntWritable.class);
+		jobConf.set("mapreduce.output.textoutputformat.separator", ",");
+
+		job.setMapperClass(AttributeSelectionMapper.class);
+		//job.setCombinerClass(IntSumReducer.class);
+		//job.setReducerClass(IntSumReducer.class);
+		job.setOutputKeyClass(IntWritable.class);
+		job.setOutputValueClass(Text.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		return job.waitForCompletion(true) ? 0 : 1;
