@@ -20,6 +20,7 @@ The dataset used at this stage is a subset of the original dataset, consisting o
 
 ### Task Name: Decision trees (MapReduce)
 
+The goal of this task is to build a decision tree, train it on a very large data set in parallel, and classify outputs from particle collisions as signal or background noise. Existing libraries for trees will not be used.
 
 ### Overview
 
