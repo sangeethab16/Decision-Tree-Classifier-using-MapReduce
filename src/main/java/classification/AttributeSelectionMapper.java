@@ -62,37 +62,18 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, T
 	@Override
 	public void cleanup(Context context) {
 		
-		Float infoDataset = (float) 0.0;
-		
-		List<InstanceValue> classLabelValues = attributeMetrics.get(0);
 		List<String> classLabels = new ArrayList<String>();
 		
-		for(int i = 0; i < classLabelValues.size(); i++) {
+		for(int i = 0; i < attributeMetrics.get(0).size(); i++) {
 			
-			classLabels.add(classLabelValues.get(i).getClassLabel());
+			classLabels.add(attributeMetrics.get(0).get(i).getClassLabel());
 		}
 		
 		Set<String> uniqueClassLabels = new HashSet<String>(classLabels);
-		Map<String, Float> classProbability = new HashMap<String, Float>();
-		
-		for (Iterator<String> iter = uniqueClassLabels.iterator(); iter.hasNext(); ) {
-			classProbability.put(iter.next(), (float)0.0);
-	    }
 		
 		
+		Float infoDataset = Helper.infoCalc(uniqueClassLabels, attributeMetrics.get(0));
 		
-		for(int i = 0; i < classLabels.size(); i++) {
-			Float count = classProbability.get(classLabels.get(i));
-			count++;
-			classProbability.put(classLabels.get(i), count);
-		}
-		
-		for (Iterator<String> iter = uniqueClassLabels.iterator(); iter.hasNext(); ) {
-			String classLabel = iter.next();
-			classProbability.put(classLabel, classProbability.get(classLabel)/classLabels.size());
-	    }
-		
-		//System.out.println("CLASS PROBABILITY : " + classProbability.toString());
 		
 		
 		
@@ -112,10 +93,7 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, T
 				
 			}*/
 			
-		}
-		
-		
-			
+		}	
 		
 	}
 }
