@@ -14,13 +14,16 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 
 public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, Text> {
-	Map<Integer, List<Double>> attributeMetrics ;
+	Map<Integer, List<InstanceValue>> attributeMetrics ;
+	Float classInfo;
 	
 	@Override
 	public void setup(Context context) {
 		
 		//Initialize HashMap
-		attributeMetrics = new HashMap<Integer, List<Double>>();
+		attributeMetrics = new HashMap<Integer, List<InstanceValue>>();
+		classInfo = (float) 0.0;
+		
 		
 	}
 	
@@ -33,36 +36,37 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, T
 		
 		String[] instanceValues = instance.toString().split(",");
 		
-		for (int i = 1; i < instanceValues.length; i++) {
+		for (int i = 0; i < instanceValues.length; i++) {
 			Double attrVal = Double.parseDouble(instanceValues[i]);
 			if(attributeMetrics.containsKey(i)) {
 				if(attributeMetrics.get(i) == null) {
-					List<Double> attributeValues = new ArrayList<Double>();
-					attributeValues.add(attrVal);
+					List<InstanceValue> attributeValues = new ArrayList<InstanceValue>();
+					attributeValues.add(new InstanceValue(attrVal,instanceValues[0]));
 					attributeMetrics.put(i, attributeValues);
 				} else {
-					attributeMetrics.get(i).add(attrVal);
+					attributeMetrics.get(i).add(new InstanceValue(attrVal,instanceValues[0]));
 				}
 			} else {
-				List<Double> attributeValues = new ArrayList<Double>();
-				attributeValues.add(attrVal);
+				List<InstanceValue> attributeValues = new ArrayList<InstanceValue>();
+				attributeValues.add(new InstanceValue(attrVal,instanceValues[0]));
 				attributeMetrics.put(i, attributeValues);
 			}
 		}
+		
 		
 	}
 	
 	@Override
 	public void cleanup(Context context) {
-		for(Map.Entry<Integer, List<Double>> entry : attributeMetrics.entrySet()) {
+		for(Map.Entry<Integer, List<InstanceValue>> entry : attributeMetrics.entrySet()) {
 			//System.out.println("Attribute ID : " + entry.getKey());
 			//System.out.println("Attribute Value List : " + entry.getValue().toString());
-			List<Double> attrValList = entry.getValue();
-			Collections.sort(attrValList);
+			List<InstanceValue> attrValList = entry.getValue();
+			Collections.sort(attrValList, new SortByValue());
 			List<Double> cpList = new ArrayList<Double>();
 			
 			for(int i = 0; i < attrValList.size()-1; i++) {
-				cpList.add(Double.sum(attrValList.get(i), attrValList.get(i+1))/2);
+				cpList.add(Double.sum(attrValList.get(i).getValue(), attrValList.get(i+1).getValue())/2);
 			}
 			
 			System.out.println("CUT POINT : " + entry.getKey() + " " + cpList.toString());
