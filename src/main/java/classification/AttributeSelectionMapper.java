@@ -2,8 +2,10 @@ package classification;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.hadoop.io.LongWritable;
@@ -31,7 +33,7 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, T
 		
 		String[] instanceValues = instance.toString().split(",");
 		
-		for (int i = 0; i < instanceValues.length; i++) {
+		for (int i = 1; i < instanceValues.length; i++) {
 			Double attrVal = Double.parseDouble(instanceValues[i]);
 			if(attributeMetrics.containsKey(i)) {
 				if(attributeMetrics.get(i) == null) {
@@ -53,8 +55,21 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, T
 	@Override
 	public void cleanup(Context context) {
 		for(Map.Entry<Integer, List<Double>> entry : attributeMetrics.entrySet()) {
-			System.out.println("Attribute ID : " + entry.getKey());
-			System.out.println("Attribute Value List : " + entry.getValue().toString());
+			//System.out.println("Attribute ID : " + entry.getKey());
+			//System.out.println("Attribute Value List : " + entry.getValue().toString());
+			List<Double> attrValList = entry.getValue();
+			Collections.sort(attrValList);
+			List<Double> cpList = new ArrayList<Double>();
+			
+			for(int i = 0; i < attrValList.size()-1; i++) {
+				cpList.add(Double.sum(attrValList.get(i), attrValList.get(i+1))/2);
+			}
+			
+			System.out.println("CUT POINT : " + entry.getKey() + " " + cpList.toString());
+			
+			
+			
+			
 		}
 			
 		
