@@ -21,6 +21,11 @@ public class Driver extends Configured implements Tool {
 
 	@Override
 	public int run(final String[] args) throws Exception {
+		final Configuration conf = getConf();
+		final Job job = Job.getInstance(conf, "Word Count");
+		job.setJarByClass(Driver.class);
+		final Configuration jobConf = job.getConfiguration();
+		jobConf.set("mapreduce.output.textoutputformat.separator", ",");
 	}
 
 	public static void main(final String[] args) {
