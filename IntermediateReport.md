@@ -16,7 +16,7 @@ High-energy particle colliders such as the Large Hadron Collider employed at CER
 
 ### Input Data
 
-The data has been produced using Monte Carlo simulations. It consists of 11,000,000 instances (rows) and 28 attributes (columns). The first column is the class label (1 for signal, 0 for background). The next 21 columns are kinematic properties measured by the particle detectors in the accelerator. The last 6 features are functions of the first 21 features; these are high-level derived features used to help discriminate between the two classes. The last 500,000 examples are used as a test set. All the data values are real numbers. 
+The dataset used at this stage is a subset of the original dataset, consisting of 1091 instances (rows) and 28 attributes (columns). The first column is the class label (1 for signal, 0 for background). The next 21 columns are kinematic properties measured by the particle detectors in the accelerator. The last 6 features are functions of the first 21 features; these are high-level derived features used to help discriminate between the two classes. All the data values are real numbers.
 
 ### Task Name: Decision trees (MapReduce)
 
