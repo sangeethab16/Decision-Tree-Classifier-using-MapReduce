@@ -47,7 +47,7 @@ public class DataPreparation extends Configured implements Tool {
 			}
 
 			result.set(cnt);
-			context.write(key, new Text(cnt));
+			context.write(key, new Text("cnt"));
 		}
 	}
 

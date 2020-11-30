@@ -2,14 +2,14 @@
 
 # Customize these paths for your environment.
 # -----------------------------------------------------------
-hadoop.root=/usr/local/Cellar/hadoop/3.3.0/libexec
+hadoop.root=/home/prajaktarods/hadoop-3.2.1
 jar.name=mr-demo-1.0.jar
 jar.path=target/${jar.name}
-job.name=classification.DataPreparation
+job.name=classification.Driver
 local.input=input
 local.output=output
 # Pseudo-Cluster Execution
-hdfs.user.name=maanasak
+hdfs.user.name=prajaktarods
 hdfs.input=input
 hdfs.output=output
 # AWS EMR Execution
@@ -17,7 +17,7 @@ aws.emr.release=emr-5.17.0
 aws.region=us-east-1
 aws.bucket.name=mr-median
 aws.subnet.id=subnet-6356553a
-aws.input=input
+aws.input=input/sample.csv
 aws.output=output
 aws.log.dir=log
 aws.num.nodes=1

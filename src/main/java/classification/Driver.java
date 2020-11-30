@@ -1,5 +1,6 @@
 package classification;
 
+import java.io.Console;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -26,13 +27,16 @@ public class Driver extends Configured implements Tool {
 		job.setJarByClass(Driver.class);
 		final Configuration jobConf = job.getConfiguration();
 		jobConf.set("mapreduce.output.textoutputformat.separator", ",");
+		jobConf.setLong("selectedAttribute", 0);
+		jobConf.setDouble("selectedAttributeCutPoint", 0);
 		job.setMapperClass(AttributeSelectionMapper.class);
 		job.setReducerClass(SelectReducer.class);
-		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(Text.class);
+		job.setOutputKeyClass(IntWritable.class);
+		job.setOutputValueClass(SelectMapperWritable.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
-		return job.waitForCompletion(true) ? 0 : 1;
+		job.waitForCompletion(true);
+		return 1;
 	}
 
 	public static void main(final String[] args) {
