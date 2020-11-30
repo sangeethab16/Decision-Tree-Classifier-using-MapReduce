@@ -5,7 +5,7 @@
 hadoop.root=/home/prajaktarods/hadoop-3.2.1
 jar.name=mr-demo-1.0.jar
 jar.path=target/${jar.name}
-job.name=wc.DataPreparation
+job.name=classification.Driver
 local.input=input
 local.output=output
 # Pseudo-Cluster Execution
@@ -17,7 +17,7 @@ aws.emr.release=emr-5.17.0
 aws.region=us-east-1
 aws.bucket.name=mr-median
 aws.subnet.id=subnet-6356553a
-aws.input=input
+aws.input=input/sample.csv
 aws.output=output
 aws.log.dir=log
 aws.num.nodes=1

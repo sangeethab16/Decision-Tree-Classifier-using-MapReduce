@@ -18,6 +18,12 @@ public class SelectMapperWritable implements Writable {
         this.attributeValue = attributeValue;
     }
 
+    public SelectMapperWritable() {
+        ratio = new FloatWritable();
+        attributeValue = new DoubleWritable();
+    }
+
+
     @Override
     public void write(DataOutput out) throws IOException {
         ratio.write(out);
@@ -52,4 +58,3 @@ public class SelectMapperWritable implements Writable {
         return ratio + "," + attributeValue;
     }
 }
-

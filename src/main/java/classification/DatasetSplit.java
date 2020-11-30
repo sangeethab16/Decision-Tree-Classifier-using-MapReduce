@@ -1,14 +1,10 @@
 package classification;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -35,7 +31,6 @@ public class DatasetSplit extends Configured implements Tool {
 		}
 		@Override
 		public void map(final Object key, final Text value, final Context context) throws IOException, InterruptedException {
-
 			String[] row = value.toString().split(",");
 			float[] rowValues = new float[row.length];
 			for(int i=0;i< row.length; i++)
@@ -57,14 +52,14 @@ public class DatasetSplit extends Configured implements Tool {
 			int k = 2;
 			float[] prob = new float[k];
 			int n = 0;
-			for( Text val: values)
+			for (Text val : values)
 				n += 1;
-			// Should implement the algorithm
+			// Algorithm to be implemented
 
-			result.set();
 			context.write(key, new Text());
 		}
 
+	}
 
 	@Override
 	public int run(final String[] args) throws Exception {
@@ -79,11 +74,11 @@ public class DatasetSplit extends Configured implements Tool {
 //			fileSystem.delete(new Path(args[1]), true);
 //		}
 		// ================
-		job.setMapperClass(ComputeMapper.class);
-		job.setCombinerClass(ComputeReducer.class);
-		job.setReducerClass(ComputeReducer.class);
+
+		job.setMapperClass(SplitMapper.class);
+		job.setReducerClass(SplitReducer.class);
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(IntWritable.class);
+		job.setOutputValueClass(Text.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 		return job.waitForCompletion(true) ? 0 : 1;
