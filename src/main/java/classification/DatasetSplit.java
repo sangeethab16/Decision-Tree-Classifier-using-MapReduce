@@ -26,15 +26,15 @@ public class DatasetSplit extends Configured implements Tool {
 
 		@Override
 		public void setup(Context context) {
-			ak = Integer.parseInt(context.getConfiguration().get("ak"));
-			cpk = Double.parseDouble(context.getConfiguration().get("cpk"));
+			ak = Integer.parseInt(context.getConfiguration().get("selectedAttributeCutPoint"));
+			cpk = Double.parseDouble(context.getConfiguration().get("selectedAttribute"));
 		}
 		@Override
 		public void map(final Object key, final Text value, final Context context) throws IOException, InterruptedException {
 			String[] row = value.toString().split(",");
 			float[] rowValues = new float[row.length];
 			for(int i=0;i< row.length; i++)
-				rowValues[i] = float.parseFloat(row[i]);
+				rowValues[i] = Float.parseFloat(row[i]);
 			int id = 0;
 			if(rowValues[ak] > cpk)
 				id = 1;
@@ -44,6 +44,7 @@ public class DatasetSplit extends Configured implements Tool {
 			}
 
 		}
+
 	public static class SplitReducer extends Reducer<IntWritable, Text, IntWritable, Text> {
 		private final IntWritable result = new IntWritable();
 
@@ -64,10 +65,15 @@ public class DatasetSplit extends Configured implements Tool {
 	@Override
 	public int run(final String[] args) throws Exception {
 		final Configuration conf = getConf();
-		final Job job = Job.getInstance(conf, "Word Count");
+		final Job job = Job.getInstance(conf, "Dataset Split");
 		job.setJarByClass(DatasetSplit.class);
 		final Configuration jobConf = job.getConfiguration();
-		jobConf.set("mapreduce.output.textoutputformat.separator", "\t");
+
+		//hardcoded for testing, need to integrate with previous job output
+		jobConf.set("selectedAttributeCutPoint", "");
+		jobConf.set("selectedAttribute", "1");
+
+		jobConf.set("mapreduce.output.textoutputformat.separator", ",");
 		// Delete output directory, only to ease local development; will not work on AWS. ===========
 //		final FileSystem fileSystem = FileSystem.get(conf);
 //		if (fileSystem.exists(new Path(args[1]))) {
@@ -76,8 +82,8 @@ public class DatasetSplit extends Configured implements Tool {
 		// ================
 
 		job.setMapperClass(SplitMapper.class);
-		job.setReducerClass(SplitReducer.class);
-		job.setOutputKeyClass(Text.class);
+//		job.setReducerClass(SplitReducer.class);
+		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(Text.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));

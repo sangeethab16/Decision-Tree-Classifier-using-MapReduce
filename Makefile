@@ -6,7 +6,7 @@ hadoop.root=/home/prajaktarods/hadoop-3.2.1
 jar.name=mr-demo-1.0.jar
 jar.path=target/${jar.name}
 job.name=classification.Driver
-local.input=input
+local.input=input/sample.csv
 local.output=output
 # Pseudo-Cluster Execution
 hdfs.user.name=prajaktarods
