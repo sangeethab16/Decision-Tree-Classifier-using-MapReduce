@@ -49,9 +49,9 @@ public class SelectReducer extends Reducer<IntWritable, SelectMapperWritable, In
         DoubleWritable value1 = new DoubleWritable(selectedAttributeCutPoint);
         FloatWritable value2 = new FloatWritable(maxRatio);
         SelectMapperWritable selectMapperWritable = new SelectMapperWritable(value2, value1);
-//        context.write(key, selectMapperWritable);
-        context.getConfiguration().set("selectedAttributeCutPoint", selectedAttributeCutPoint + "");
-        context.getConfiguration().set("selectedAttribute", selectedAttribute + "");
+        context.write(key, selectMapperWritable);
+//        context.getConfiguration().set("selectedAttributeCutPoint", selectedAttributeCutPoint + "");
+//        context.getConfiguration().set("selectedAttribute", selectedAttribute + "");
     }
 
 }
