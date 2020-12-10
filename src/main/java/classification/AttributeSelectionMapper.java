@@ -77,11 +77,14 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, IntWrit
 		
 		Float infoDataset = Helper.infoCalc(uniqueClassLabels, attributeMetrics.get(0));
 		
-		
+		System.out.println("INFO : " + infoDataset);
 		
 		
 		for(Map.Entry<Integer, List<InstanceValue>> entry : attributeMetrics.entrySet()) {
 			
+			if (entry.getKey() == 0) {
+				continue;
+			}
 			List<InstanceValue> attrValList = entry.getValue();
 			Collections.sort(attrValList, new SortByValue());
 			List<Double> cpList = new ArrayList<Double>();
@@ -118,23 +121,21 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, IntWrit
 					
 				}
 				
+				float Xij1 = ((float)attrValLessCP.size())/attrValList.size();
+				float Xij2 = ((float)attrValGreaterCP.size())/attrValList.size();
 				
-				
-				Float gain = infoDataset - ((((float)attrValLessCP.size()/attrValList.size()) * 
-						Helper.infoCalc(uniqueClassLabels, attrValLessCP)) + ((float)(attrValGreaterCP.size()/attrValList.size()) * 
-								Helper.infoCalc(uniqueClassLabels, attrValGreaterCP)));
-				
+				Float gain = infoDataset - (Xij1 * Helper.infoCalc(uniqueClassLabels, attrValLessCP) + 
+						Xij2 * Helper.infoCalc(uniqueClassLabels, attrValGreaterCP));
 				if (gain > maxGain) {
 					maxGain = gain;
 					maxGainCP = cpList.get(i);
 					float prop1 = ((float)attrValLessCP.size()/attrValList.size());
-					float prop2 = ((float)attrValLessCP.size()/attrValList.size());
+					float prop2 = ((float)attrValGreaterCP.size()/attrValList.size());
 					split = (prop1 * (float) (Math.log(prop1) / Math.log(2))) + (prop2 * (float) (Math.log(prop2) / Math.log(2)));
 					split = (float) (split * -1.0);
 					ratio = gain / split;
 				}
 				
-								
 				
 			}
 			context.write(new IntWritable(entry.getKey()), new SelectMapperWritable(new FloatWritable(ratio),new DoubleWritable(maxGainCP)));
