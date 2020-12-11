@@ -22,10 +22,6 @@ public class Node {
     	}
     	else if (nodeAttr.length == 2) {
     		this.setId(Integer.parseInt(nodeAttr[0]));
-    		this.setLeftChild(0);
-    		this.setRightChild(0);
-    		this.setAttribute(0);
-    		this.setCutPoint(0);
     		this.setClassLabel(nodeAttr[1]);
     	}
     }

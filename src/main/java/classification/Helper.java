@@ -63,11 +63,11 @@ public class Helper {
 			
 			if (Float.parseFloat(instanceValues[rootNode.getAttribute()]) <= rootNode.getCutPoint()) {
 				Node leftNode = decisionTree.get(rootNode.getLeftChild());
-				makePrediction(instance, decisionTree, leftNode.getId());
+				predictedValue = makePrediction(instance, decisionTree, leftNode.getId());
 			}
 			else {
 				Node rightNode = decisionTree.get(rootNode.getRightChild());
-				makePrediction(instance, decisionTree, rightNode.getId());
+				predictedValue = makePrediction(instance, decisionTree, rightNode.getId());
 			}
 			
 		}

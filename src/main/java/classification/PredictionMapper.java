@@ -14,7 +14,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-public class PredictionMapper extends Mapper<LongWritable, Text, LongWritable, Text>{
+public class PredictionMapper extends Mapper<LongWritable, Text, Text, Text>{
 
 	private static final Logger logger = LogManager.getLogger(PredictionMapper.class);
 	
@@ -75,9 +75,8 @@ public class PredictionMapper extends Mapper<LongWritable, Text, LongWritable, T
 		
 		String predictedValue = Helper.makePrediction(instance.toString(), decisionTree, ONE);
 		
-		String value = predictedValue + "," + instanceValues[0];
 		
-		context.write(new LongWritable(key.get()), new Text(value));
+		context.write(new Text(instanceValues[0]), new Text(predictedValue));
 		
 
 	}
