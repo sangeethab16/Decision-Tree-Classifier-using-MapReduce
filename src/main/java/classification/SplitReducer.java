@@ -1,21 +1,31 @@
 package classification;
 
+import classification.utility.Node;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SplitReducer extends Reducer<IntWritable, Text, Text, Text> {
     private final IntWritable result = new IntWritable();
     float minProbability = 1.0f;
     int maxRecordsInPartition = 1;
+    int ak;
+    double cpk;
+    private MultipleOutputs mos;
 
     @Override
-    public void setup(Reducer.Context context) {
+    public void setup(Context context) {
         minProbability = Float.parseFloat(context.getConfiguration().get("minProbability"));
         maxRecordsInPartition = Integer.parseInt(context.getConfiguration().get("maxRecordsInPartition"));
+        ak = Integer.parseInt(context.getConfiguration().get("selectedAttributeCutPoint"));
+        cpk = Double.parseDouble(context.getConfiguration().get("selectedAttribute"));
+        mos = new MultipleOutputs(context);
     }
 
     @Override
@@ -38,17 +48,44 @@ public class SplitReducer extends Reducer<IntWritable, Text, Text, Text> {
 
         int k = total == maxCount ? 1 : 2;
 
-        if((maxCount/total) <= minProbability && total >= maxRecordsInPartition && k > 1) {
-            for(Text val: values)
-                context.write(new Text(""), val);
+        int childId = -1;
+
+
+        if(key.get() == 1) {
+            //need to change key to parentKey which is read at mapper level
+            childId = newId(key.get(), "left");
         }
         else {
-            //add as leaf node
+            //need to change key to parentKey which is read at mapper level
+            childId = newId(key.get(), "right");
         }
 
+        if((maxCount/total) <= minProbability && total >= maxRecordsInPartition && k > 1) {
+            //need to change key to parentKey which is read at mapper level
+            mos.write( "text", key, new Text(ak + "" + cpk + "" + newId(key.get(), "left") + "," + newId(key.get(), "right")));
+            for(Text val: values)
+                context.write(new Text(""), new Text(val.toString() +"," + childId));
+        }
+        else {
+            //need to change key to parentKey which is read at mapper level
+            int maxCountClass = countClassOne > countClassZero? 1: 0;
+            mos.write("text", key, new Text(maxCountClass + ""));
+        }
+    }
+
+    @Override
+    public void cleanup(final Context context) throws IOException, InterruptedException {
+
+    }
 
 
-//			context.write(key, new Text());
+    private int newId(int parentId, String childName) {
+        if(childName.equals("left")) {
+            return (parentId * 10) + 1;
+        }
+        else {
+            return (parentId * 10) + 2;
+        }
     }
 
 }
