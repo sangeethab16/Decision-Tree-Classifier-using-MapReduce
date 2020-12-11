@@ -51,5 +51,32 @@ public class Helper {
 		info = info * -1;
 		return info;
 	}
+	
+	public static String makePrediction(String instance, Map<Integer, Node> decisionTree, Integer rootID) {
+		
+		String[] instanceValues = instance.split(",");
+		Node rootNode = decisionTree.get(rootID);
+		System.out.println(instance);
+		String predictedValue = null;
+		
+		if(rootNode.getClassLabel().isEmpty()) {
+			
+			if (Float.parseFloat(instanceValues[rootNode.getAttribute()]) <= rootNode.getCutPoint()) {
+				Node leftNode = decisionTree.get(rootNode.getLeftChild());
+				makePrediction(instance, decisionTree, leftNode.getId());
+			}
+			else {
+				Node rightNode = decisionTree.get(rootNode.getRightChild());
+				makePrediction(instance, decisionTree, rightNode.getId());
+			}
+			
+		}
+		else {
+			predictedValue = rootNode.getClassLabel();
+		}
+		
+		return predictedValue;
+		
+	}
 
 }
