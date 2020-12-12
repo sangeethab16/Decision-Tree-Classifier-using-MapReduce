@@ -45,26 +45,6 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
         int countClassZero = 0;
         int total = 0;
 
-        for (Text val : values) {
-            Double outputClass = Double.parseDouble(val.toString().split(",")[0]);
-            System.out.println(outputClass);
-            System.out.println(outputClass == 0.0);
-            if(outputClass == 0.0) {
-                countClassZero++;
-            }
-            else {
-                countClassOne++;
-            }
-            total+=1;
-        }
-
-        System.out.println("countClassZero" + countClassZero);
-        System.out.println("countClassOne" + countClassOne);
-
-        int maxCount = Math.max(countClassOne, countClassZero);
-
-        int k = total == maxCount ? 1 : 2;
-
         long childId = -1;
 
 
@@ -76,13 +56,49 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
             childId = newId(key.get(), "right");
         }
 
-        if((maxCount/total) <= minProbability && total >= maxRecordsInPartition && k > 1) {
+        System.out.println("here once");
+
+        for (Text val : values) {
+            Double outputClass = Double.parseDouble(val.toString().split(",")[0]);
+            if(outputClass == 0.0) {
+                countClassZero++;
+            }
+            else {
+                countClassOne++;
+            }
+            total+=1;
+            //mos.write("data", new Text(""), new Text(val.toString() +"," + childId));
+            mos.write(new Text(""), new Text(val.toString() +"," + childId), "/" + key.get() + "datatest");
+        }
+
+        System.out.println("countClassZero" + countClassZero);
+        System.out.println("countClassOne" + countClassOne);
+
+        int maxCount = Math.max(countClassOne, countClassZero);
+
+        int k = total == maxCount ? 1 : 2;
+
+
+
+
+        System.out.println("minProb" + (maxCount/total));
+        System.out.println("maxRecord" + total);
+        System.out.println("k"+ k);
+
+        if((maxCount/((float)total)) <= minProbability && total >= maxRecordsInPartition && k > 1) {
             //need to change key to parentKey which is read at mapper level
 
-            for(Text val: values)
-                mos.write("data", new Text(""), new Text(val.toString() +"," + childId));
+//            mos.write("data", new Text("tst"), new Text("nn"));
+//            for(Text val: values) {
+//                System.out.println("Most imp");
+//                mos.write("data", new Text(""), new Text(val.toString() +"," + childId));
+//            }
+            System.out.println("Already written");
         }
         else {
+            //delete the file created
+            
+
             if(key.get() == 1) {
                 isLeftLeafNode = true;
                 leftMaxCountClass = countClassOne > countClassZero? 1: 0;
@@ -93,6 +109,7 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
             }
         }
     }
+
 
     @Override
     public void cleanup(final Context context) throws IOException, InterruptedException {

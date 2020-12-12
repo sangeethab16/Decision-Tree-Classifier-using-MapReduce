@@ -2,6 +2,7 @@ package classification;
 
 import java.io.Console;
 import java.io.IOException;
+import org.apache.log4j.Logger;
 
 import classification.utility.SPLIT_COUNTER;
 import org.apache.hadoop.conf.Configuration;
