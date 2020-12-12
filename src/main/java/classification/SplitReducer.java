@@ -2,6 +2,7 @@ package classification;
 
 import classification.utility.Node;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -11,31 +12,44 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SplitReducer extends Reducer<IntWritable, Text, Text, Text> {
+public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
     private final IntWritable result = new IntWritable();
     float minProbability = 1.0f;
     int maxRecordsInPartition = 1;
     int ak;
     double cpk;
     private MultipleOutputs mos;
+    int parentKey;
+    boolean isLeftLeafNode;
+    boolean isRightLeafNode;
+    int leftMaxCountClass;
+    int rightMaxCountClass;
 
     @Override
     public void setup(Context context) {
         minProbability = Float.parseFloat(context.getConfiguration().get("minProbability"));
         maxRecordsInPartition = Integer.parseInt(context.getConfiguration().get("maxRecordsInPartition"));
-        ak = Integer.parseInt(context.getConfiguration().get("selectedAttributeCutPoint"));
-        cpk = Double.parseDouble(context.getConfiguration().get("selectedAttribute"));
+        ak = Integer.parseInt(context.getConfiguration().get("selectedAttribute"));
+        cpk = Double.parseDouble(context.getConfiguration().get("selectedAttributeCutPoint"));
         mos = new MultipleOutputs(context);
+        parentKey = -1;
+        isLeftLeafNode = false;
+        isRightLeafNode = false;
+        leftMaxCountClass = -1;
+        rightMaxCountClass = -1;
     }
 
     @Override
-    public void reduce(final IntWritable key, final Iterable<Text> values, final Context context) throws IOException, InterruptedException {
+    public void reduce(final LongWritable key, final Iterable<Text> values, final Context context) throws IOException, InterruptedException {
         int countClassOne = 0;
         int countClassZero = 0;
         int total = 0;
+
         for (Text val : values) {
-            int outputClass = Integer.parseInt(val.toString().split(",")[0]);
-            if(outputClass == 0) {
+            Double outputClass = Double.parseDouble(val.toString().split(",")[0]);
+            System.out.println(outputClass);
+            System.out.println(outputClass == 0.0);
+            if(outputClass == 0.0) {
                 countClassZero++;
             }
             else {
@@ -44,15 +58,17 @@ public class SplitReducer extends Reducer<IntWritable, Text, Text, Text> {
             total+=1;
         }
 
+        System.out.println("countClassZero" + countClassZero);
+        System.out.println("countClassOne" + countClassOne);
+
         int maxCount = Math.max(countClassOne, countClassZero);
 
         int k = total == maxCount ? 1 : 2;
 
-        int childId = -1;
+        long childId = -1;
 
 
         if(key.get() == 1) {
-            //need to change key to parentKey which is read at mapper level
             childId = newId(key.get(), "left");
         }
         else {
@@ -62,24 +78,53 @@ public class SplitReducer extends Reducer<IntWritable, Text, Text, Text> {
 
         if((maxCount/total) <= minProbability && total >= maxRecordsInPartition && k > 1) {
             //need to change key to parentKey which is read at mapper level
-            mos.write( "text", key, new Text(ak + "" + cpk + "" + newId(key.get(), "left") + "," + newId(key.get(), "right")));
+
             for(Text val: values)
-                context.write(new Text(""), new Text(val.toString() +"," + childId));
+                mos.write("data", new Text(""), new Text(val.toString() +"," + childId));
         }
         else {
-            //need to change key to parentKey which is read at mapper level
-            int maxCountClass = countClassOne > countClassZero? 1: 0;
-            mos.write("text", key, new Text(maxCountClass + ""));
+            if(key.get() == 1) {
+                isLeftLeafNode = true;
+                leftMaxCountClass = countClassOne > countClassZero? 1: 0;
+            }
+            else {
+                isRightLeafNode = true;
+                rightMaxCountClass = countClassOne > countClassZero? 1: 0;
+            }
         }
     }
 
     @Override
     public void cleanup(final Context context) throws IOException, InterruptedException {
+        StringBuilder res = new StringBuilder();
+        res.append(ak + "," + cpk + ",");
+        if(isLeftLeafNode) {
+            res.append("true" + "," + leftMaxCountClass + ",");
+        }
+        else {
+            res.append("false" + "," + newId(parentKey, "left") + ",");
+        }
 
+        if(isRightLeafNode) {
+            res.append("true" + "," + rightMaxCountClass);
+        }
+        else {
+            res.append("false" + "," + newId(parentKey, "right"));
+        }
+
+        mos.write("tree", new LongWritable(parentKey), new Text(res.toString()));
+        mos.close();
     }
 
 
-    private int newId(int parentId, String childName) {
+    private long newId(long parentId, String childName) {
+        if(parentId == -1) {
+            if(childName.equals("left"))
+                return 1;
+            else
+                return 2;
+        }
+
         if(childName.equals("left")) {
             return (parentId * 10) + 1;
         }
