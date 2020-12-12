@@ -23,6 +23,20 @@ import org.apache.log4j.LogManager;
 
 	@Override
 	public int run(final String[] args) throws Exception {
+		final Configuration conf = getConf();
+		final Job job = Job.getInstance(conf, "Word Count");
+		job.setJarByClass(Driver.class);
+		final Configuration jobConf = job.getConfiguration();
+		jobConf.set("mapreduce.output.textoutputformat.separator", ",");
+		jobConf.setLong("selectedAttribute", 0);
+		jobConf.setDouble("selectedAttributeCutPoint", 0);
+		job.setMapperClass(AttributeSelectionMapper.class);
+		job.setReducerClass(SelectReducer.class);
+		job.setOutputKeyClass(IntWritable.class);
+		job.setOutputValueClass(SelectMapperWritable.class);
+		FileInputFormat.addInputPath(job, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		job.waitForCompletion(true);
 
 		int maxHeight = 1;
 		int height = 0;
