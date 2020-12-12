@@ -8,19 +8,22 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-public class PredictionMapper extends Mapper<LongWritable, Text, Text, Text>{
+public class PredictionMapper extends Mapper<LongWritable, Text, IntWritable, IntWritable>{
 
 	private static final Logger logger = LogManager.getLogger(PredictionMapper.class);
 	
 	Map<Integer, Node> decisionTree = new HashMap<Integer, Node>();
 	private static final String FILE_LABEL = "Tree";
 	private static final Integer ONE = 1;
+	MultipleOutputs multipleOutputs;
 
 	@Override
 	public void setup(Context context) throws IOException {
@@ -29,7 +32,6 @@ public class PredictionMapper extends Mapper<LongWritable, Text, Text, Text>{
 		try {
 			//Checking DistributedCache for files
 			URI[] cacheFiles = context.getCacheFiles();
-			System.out.println(cacheFiles.toString());
 
 			if(cacheFiles == null || !(cacheFiles.length > 0)) {
 
@@ -44,11 +46,14 @@ public class PredictionMapper extends Mapper<LongWritable, Text, Text, Text>{
 
 			// For each record in the edge file
 			while ((rule = reader.readLine()) != null) {
-
+				
+				System.out.println(rule);
 				String[] nodeAttr = rule.toString().split(",");
 				decisionTree.put(Integer.parseInt(nodeAttr[0]), new Node(rule.toString()));
 				
 			}
+			
+			
 
 
 			
@@ -67,16 +72,20 @@ public class PredictionMapper extends Mapper<LongWritable, Text, Text, Text>{
 	@Override
 	public void map(final LongWritable key, final Text instance, final Context context) throws IOException, InterruptedException {
 		
-		if(key.get() == 0) {
+		if(key.get() == 0 && instance.toString().contains("label")) {
 			return;
 		}
 
 		String[] instanceValues = instance.toString().split(",");
 		
-		String predictedValue = Helper.makePrediction(instance.toString(), decisionTree, ONE);
+		Double predictedValue = Double.parseDouble(Helper.makePrediction(instance.toString(), decisionTree, ONE));
 		
-		
-		context.write(new Text(instanceValues[0]), new Text(predictedValue));
+		if(predictedValue == Double.parseDouble(instanceValues[0])) {
+			context.write(new IntWritable(1), new IntWritable(1));
+		}
+		else {
+			context.write(new IntWritable(0), new IntWritable(1));
+		}
 		
 
 	}

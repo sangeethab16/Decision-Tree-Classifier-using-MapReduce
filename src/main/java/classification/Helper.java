@@ -56,23 +56,32 @@ public class Helper {
 		
 		String[] instanceValues = instance.split(",");
 		Node rootNode = decisionTree.get(rootID);
-		System.out.println(instance);
 		String predictedValue = null;
 		
-		if(rootNode.getClassLabel().isEmpty()) {
+		
+		if (Float.parseFloat(instanceValues[rootNode.getAttribute()]) <= rootNode.getCutPoint()) {
 			
-			if (Float.parseFloat(instanceValues[rootNode.getAttribute()]) <= rootNode.getCutPoint()) {
-				Node leftNode = decisionTree.get(rootNode.getLeftChild());
-				predictedValue = makePrediction(instance, decisionTree, leftNode.getId());
+			if (rootNode.getLeftFlag().equals("false")) {
+				
+				
+				predictedValue = makePrediction(instance, decisionTree, rootNode.getLeftChild());
 			}
+			
 			else {
-				Node rightNode = decisionTree.get(rootNode.getRightChild());
-				predictedValue = makePrediction(instance, decisionTree, rightNode.getId());
+				predictedValue = rootNode.getLeftChild().toString();
+			}
+		}
+		
+		else {
+			
+			if (rootNode.getRightFlag().equals("false")) {
+				
+				predictedValue = makePrediction(instance, decisionTree, rootNode.getRightChild());
 			}
 			
-		}
-		else {
-			predictedValue = rootNode.getClassLabel();
+			else {
+				predictedValue = rootNode.getRightChild().toString();
+			}
 		}
 		
 		return predictedValue;
