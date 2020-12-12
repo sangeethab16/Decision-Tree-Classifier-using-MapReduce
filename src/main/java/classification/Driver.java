@@ -2,16 +2,21 @@ package classification;
 
 import java.io.Console;
 import java.io.IOException;
+
+import classification.utility.SPLIT_COUNTER;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.LogManager;
@@ -22,20 +27,10 @@ public class Driver extends Configured implements Tool {
 
 	@Override
 	public int run(final String[] args) throws Exception {
-		final Configuration conf = getConf();
-		final Job job = Job.getInstance(conf, "Word Count");
-		job.setJarByClass(Driver.class);
-		final Configuration jobConf = job.getConfiguration();
-		jobConf.set("mapreduce.output.textoutputformat.separator", ",");
-		jobConf.setLong("selectedAttribute", 0);
-		jobConf.setDouble("selectedAttributeCutPoint", 0);
-		job.setMapperClass(AttributeSelectionMapper.class);
-		job.setReducerClass(SelectReducer.class);
-		job.setOutputKeyClass(IntWritable.class);
-		job.setOutputValueClass(SelectMapperWritable.class);
-		FileInputFormat.addInputPath(job, new Path(args[0]));
-		FileOutputFormat.setOutputPath(job, new Path(args[1]));
-		job.waitForCompletion(true);
+
+		int maxHeight = 1;
+		int height = 0;
+
 		return 1;
 	}
 
