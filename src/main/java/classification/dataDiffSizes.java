@@ -6,6 +6,11 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class DataDiffSizes extends Mapper<Object, Text, NullWritable, Text>{
-
+public class DataDiffSizes extends Mapper<LongWritable, Text, IntWritable, SelectMapperWritable>{
+	private Random randomNumber = new Random();
+	private Double samplingPercentage;
+	protected void setup(Context context) throws IOException, InterruptedException {
+		String percentage = context.getConfiguration().get("sampling_percentage");
+		samplingPercentage = Double.parseDouble(percentage) / 100.0;
+	}
 }
