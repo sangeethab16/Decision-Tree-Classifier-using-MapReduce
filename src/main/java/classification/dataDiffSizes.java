@@ -11,8 +11,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 public class DataDiffSizes extends Configuration implements Tool{
 	public static class DiffSizeMapper extends Mapper <Object, Text, LongWritable, NullWritableText>{
-		private Random randomNumber = new Random();
-		private Double samplingPercentage;
+		//private Random randomNumber = new Random();
+		private Double size;
 	
 		//calculates sampling percentage to use as threshold
 		protected void setup(Context context) throws IOException, InterruptedException {
@@ -23,9 +23,9 @@ public class DataDiffSizes extends Configuration implements Tool{
 		@Override
 		//compares randomly generated number with threshold to decide whether to keep value or not
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-			if (randomNumber.nextDouble() < samplingPercentage) {
+			//if (randomNumber.nextDouble() < samplingPercentage) {
 				context.write(NullWritable.get(), value);
-			}
+			//}
 		}
 	}
 	
