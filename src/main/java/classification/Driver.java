@@ -2,9 +2,11 @@ package classification;
 
 import java.io.Console;
 import java.io.IOException;
+
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.log4j.Logger;
+
 import classification.utility.SPLIT_COUNTER;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -25,7 +27,9 @@ import org.apache.log4j.LogManager;
 
 public class Driver extends Configured implements Tool {
 	private static final Logger logger = LogManager.getLogger(Driver.class);
-	
+
+	long partitions = -1;
+
 	@Override
     	public int run(final String[] args) throws Exception {
 		int maxHeight = 2;
@@ -49,6 +53,8 @@ public class Driver extends Configured implements Tool {
  			job.setOutputKeyClass(IntWritable.class);
             		job.setOutputValueClass(SelectMapperWritable.class);
 
+
+
  			FileInputFormat.addInputPath(job, inputPath);
             		FileOutputFormat.setOutputPath(job, tempOutput);
 
@@ -62,10 +68,12 @@ public class Driver extends Configured implements Tool {
             		System.out.println(selectedAttribute);
             
 			Configuration confTwo = getConf();
+
             		Job jobTwo = Job.getInstance(confTwo, "Decision Tree Building");
             		jobTwo.setJarByClass(Driver.class);
             		Configuration jobConfigTwo = jobTwo.getConfiguration();
             		jobConfigTwo.set("mapreduce.output.textoutputformat.separator", ",");
+
 
  			jobConfigTwo.setLong("selectedAttribute", selectedAttribute);
             		jobConfigTwo.setDouble("selectedAttributeCutPoint", finalCutpoint);
@@ -79,12 +87,18 @@ public class Driver extends Configured implements Tool {
             		FileOutputFormat.setOutputPath(jobTwo, outputPath);
 			
             		jobTwo.waitForCompletion(true);
+            		partitions = jobTwo.getCounters().findCounter(SPLIT_COUNTER.PARTITIONS).getValue();
+            		System.out.println("party" + partitions);
+				jobTwo.getCounters().findCounter(SPLIT_COUNTER.PARTITIONS).setValue(0);
 
  			inputPath = new Path(args[1] +"/" +height +"/data");
             		height++;
             		outputPath = new Path(args[1] + "/" + height);
             		tempOutput = new Path("tempo"+ "/" + height);
+
+
         	}
+
 		return 1;
 	}
 	public static void main(final String[] args) {

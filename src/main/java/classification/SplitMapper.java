@@ -29,10 +29,12 @@ public class SplitMapper extends Mapper<Object, Text, LongWritable, Text> {
         for(int i=0;i< row.length; i++)
             rowValues[i] = Float.parseFloat(row[i]);
         int id = 0;
-        if(rowValues[ak] > cpk)
+        if(rowValues[ak] > cpk) {
             id = 1;
-        else
+        }
+        else {
             id = 0;
+        }
         context.write(new LongWritable(id),value);
     }
 

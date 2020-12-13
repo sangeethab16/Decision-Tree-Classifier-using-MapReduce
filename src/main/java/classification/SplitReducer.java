@@ -1,16 +1,24 @@
 package classification;
 
 import classification.utility.Node;
+import classification.utility.SPLIT_COUNTER;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.MarkableIterator;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
     private final IntWritable result = new IntWritable();
@@ -24,6 +32,7 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
     boolean isRightLeafNode;
     int leftMaxCountClass;
     int rightMaxCountClass;
+    Map<Integer, Node> parentChildren;
 
     @Override
     public void setup(Context context) {
@@ -37,6 +46,8 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
         isRightLeafNode = false;
         leftMaxCountClass = -1;
         rightMaxCountClass = -1;
+        System.out.println("Just to check");
+        parentChildren = new HashMap<>();
     }
 
     @Override
@@ -45,10 +56,32 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
         int countClassZero = 0;
         int total = 0;
 
-        for (Text val : values) {
-            Double outputClass = Double.parseDouble(val.toString().split(",")[0]);
-            System.out.println(outputClass);
-            System.out.println(outputClass == 0.0);
+        long childId = -1;
+        MarkableIterator<Text> mitr = new MarkableIterator<Text>(values.iterator());
+        mitr.mark();
+
+        if(key.get() == 1) {
+            childId = newId(parentKey, "left");
+        }
+        else {
+            //need to change key to parentKey which is read at mapper level
+            childId = newId(parentKey, "right");
+        }
+
+        while (mitr.hasNext()) {
+            Text temp = mitr.next();
+
+            if(parentKey == -1) {
+                String splitVal[] = temp.toString().split(",");
+                try {
+                    parentKey = Integer.parseInt(splitVal[splitVal.length-1]);
+                }
+                catch (Exception e) {
+                    parentKey = 1;
+                }
+            }
+
+            Double outputClass = Double.parseDouble(temp.toString().split(",")[0]);
             if(outputClass == 0.0) {
                 countClassZero++;
             }
@@ -58,31 +91,27 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
             total+=1;
         }
 
-        System.out.println("countClassZero" + countClassZero);
-        System.out.println("countClassOne" + countClassOne);
-
         int maxCount = Math.max(countClassOne, countClassZero);
 
         int k = total == maxCount ? 1 : 2;
 
-        long childId = -1;
 
 
-        if(key.get() == 1) {
-            childId = newId(key.get(), "left");
+
+        if((maxCount/((float)total)) <= minProbability && total >= maxRecordsInPartition && k > 1) {
+        mitr.reset();
+            context.getCounter(SPLIT_COUNTER.PARTITIONS).increment(1);
+            while (mitr.hasNext()) {
+                mos.write(NullWritable.get(), new Text(mitr.next().toString() +"," + childId), "data/partition" + key);
+            }
         }
         else {
-            //need to change key to parentKey which is read at mapper level
-            childId = newId(key.get(), "right");
-        }
+            System.out.println("here definitely");
+            System.out.println("parm" + minProbability);
+            System.out.println("minProb" + (maxCount/((float)total)));
+            System.out.println("maxRecord" + total);
+            System.out.println("k"+ k);
 
-        if((maxCount/total) <= minProbability && total >= maxRecordsInPartition && k > 1) {
-            //need to change key to parentKey which is read at mapper level
-
-            for(Text val: values)
-                mos.write("data", new Text(""), new Text(val.toString() +"," + childId));
-        }
-        else {
             if(key.get() == 1) {
                 isLeftLeafNode = true;
                 leftMaxCountClass = countClassOne > countClassZero? 1: 0;
@@ -93,6 +122,7 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
             }
         }
     }
+
 
     @Override
     public void cleanup(final Context context) throws IOException, InterruptedException {
@@ -112,17 +142,17 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
             res.append("false" + "," + newId(parentKey, "right"));
         }
 
-        mos.write("tree", new LongWritable(parentKey), new Text(res.toString()));
+        mos.write(new LongWritable(parentKey), new Text(res.toString()), "decision/tree");
         mos.close();
     }
 
 
     private long newId(long parentId, String childName) {
-        if(parentId == -1) {
+        if(parentId == 1) {
             if(childName.equals("left"))
-                return 1;
+                return 11;
             else
-                return 2;
+                return 12;
         }
 
         if(childName.equals("left")) {
