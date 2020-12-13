@@ -1,6 +1,7 @@
 package classification;
 
 import classification.utility.SPLIT_COUNTER;
+import classification.utility.SelectedAttribute;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
@@ -13,7 +14,10 @@ import org.apache.hadoop.mapreduce.MarkableIterator;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,29 +27,53 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
     private final IntWritable result = new IntWritable();
     float minProbability = 1.0f;
     int maxRecordsInPartition = 1;
-    int ak;
-    double cpk;
     private MultipleOutputs mos;
     int parentKey;
-    boolean isLeftLeafNode;
-    boolean isRightLeafNode;
+//    boolean isLeftLeafNode;
+//    boolean isRightLeafNode;
     int leftMaxCountClass;
     int rightMaxCountClass;
     Map<Integer, Node> parentChildren;
+    Map<Integer, SelectedAttribute> parentSelectionAttr;
 
     @Override
-    public void setup(Context context) {
+    public void setup(Context context) throws IOException {
         minProbability = Float.parseFloat(context.getConfiguration().get("minProbability"));
         maxRecordsInPartition = Integer.parseInt(context.getConfiguration().get("maxRecordsInPartition"));
         mos = new MultipleOutputs(context);
         parentKey = -1;
-        isLeftLeafNode = false;
-        isRightLeafNode = false;
+//        isLeftLeafNode = false;
+//        isRightLeafNode = false;
         leftMaxCountClass = -1;
         rightMaxCountClass = -1;
         System.out.println("Just to check");
         parentChildren = new HashMap<>();
 
+        //add
+        parentSelectionAttr = new HashMap<>();
+        URI[] cacheFiles = context.getCacheFiles();
+
+        if (cacheFiles == null || cacheFiles.length == 0) {
+            throw new RuntimeException(
+                    "User information is not set in DistributedCache");
+        }
+        try
+        {
+            BufferedReader rdr = new BufferedReader(new FileReader("filelabel"));
+            SelectedAttribute selectedAttribute;
+            String line;
+            // For each record in the user file
+            while ((line = rdr.readLine()) != null) {
+                String[] temp = line.split(",");
+                selectedAttribute = new SelectedAttribute(Integer.parseInt(temp[2]),
+                        Float.parseFloat(temp[1]));
+                parentSelectionAttr.put(Integer.parseInt(temp[0]), selectedAttribute);
+            }
+
+        } catch (IOException e) {
+            System.out.println("Some IO issue");
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -69,6 +97,9 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
             parentNode = new Node();
             parentNode.setId(parentKey);
         }
+
+        parentNode.setAttribute(parentSelectionAttr.get(parentKey).getAk());
+        parentNode.setCutPoint(parentSelectionAttr.get(parentKey).getCpk());
 
         while (mitr.hasNext()) {
             Text temp = mitr.next();
@@ -98,27 +129,23 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
 
         if((maxCount/((float)total)) <= minProbability && total >= maxRecordsInPartition && k > 1) {
         mitr.reset();
-            context.getCounter(SPLIT_COUNTER.PARTITIONS).increment(1);
+
             while (mitr.hasNext()) {
-                mos.write(NullWritable.get(), new Text(mitr.next().toString() +"," + childId), "data/partition" + key);
+                String val = mitr.next().toString();
+                if(parentKey!=1) {
+                    val = val.substring(0, val.lastIndexOf(","));
+                }
+                mos.write(NullWritable.get(), new Text(val +"," + childId), "data/partition" + key);
             }
         }
         else {
-//            System.out.println("here definitely");
-//            System.out.println("parm" + minProbability);
-//            System.out.println("minProb" + (maxCount/((float)total)));
-//            System.out.println("maxRecord" + total);
-//            System.out.println("k"+ k);
-
             if(key.toString().split(",")[1] == "1") {
                 parentNode.setLeftFlag("true");
-                isLeftLeafNode = true;
                 leftMaxCountClass = countClassOne > countClassZero? 1: 0;
                 parentNode.setLeftChild(leftMaxCountClass);
             }
             else {
                 parentNode.setRightFlag("true");
-                isRightLeafNode = true;
                 rightMaxCountClass = countClassOne > countClassZero? 1: 0;
                 parentNode.setRightChild(rightMaxCountClass);
             }
