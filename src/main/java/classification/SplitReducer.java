@@ -37,11 +37,12 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
         ak = Integer.parseInt(context.getConfiguration().get("selectedAttribute"));
         cpk = Double.parseDouble(context.getConfiguration().get("selectedAttributeCutPoint"));
         mos = new MultipleOutputs(context);
-        parentKey = 1;
+        parentKey = -1;
         isLeftLeafNode = false;
         isRightLeafNode = false;
         leftMaxCountClass = -1;
         rightMaxCountClass = -1;
+        System.out.println("Just to check");
     }
 
     @Override
@@ -64,6 +65,17 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
 
         while (mitr.hasNext()) {
             Text temp = mitr.next();
+
+            if(parentKey == -1) {
+                String splitVal[] = temp.toString().split(",");
+                try {
+                    parentKey = Integer.parseInt(splitVal[splitVal.length-1]);
+                }
+                catch (Exception e) {
+                    parentKey = 1;
+                }
+            }
+
             Double outputClass = Double.parseDouble(temp.toString().split(",")[0]);
             if(outputClass == 0.0) {
                 countClassZero++;
@@ -72,8 +84,6 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
                 countClassOne++;
             }
             total+=1;
-            //mos.write("data", new Text(""), new Text(val.toString() +"," + childId));
-//            mos.write(new Text(""), new Text(temp.toString() +"," + childId), "/" + key.get() + "datatest");
         }
 
         int maxCount = Math.max(countClassOne, countClassZero);
@@ -84,11 +94,8 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
 
 
         if((maxCount/((float)total)) <= minProbability && total >= maxRecordsInPartition && k > 1) {
-            //Need to save this to file
         mitr.reset();
-            //need to change key to parentKey which is read at mapper level
 
-//            mos.write("data", new Text("tst"), new Text("nn"));
             while (mitr.hasNext()) {
                 mos.write(NullWritable.get(), new Text(mitr.next().toString() +"," + childId), "data/partition");
             }
