@@ -2,7 +2,10 @@ package classification;
 
 import java.io.Console;
 import java.io.IOException;
+import java.net.URI;
 
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.log4j.Logger;
@@ -36,69 +39,59 @@ public class Driver extends Configured implements Tool {
         	int height = 0;
 		
 		Path inputPath = new Path(args[0]);
-        	Path outputPath = new Path(args[1] + "/0");
-        	Path tempOutput = new Path("tempo"+ "/" + height);
+		Path outputPath = new Path(args[1] + "/0");
+		Path tempOutput = new Path("tempo"+ "/" + height);
 
-        	while(height < maxHeight) {
-            		Configuration conf = getConf();
-            		Job job = Job.getInstance(conf, "Decision Tree");
-            		job.setJarByClass(Driver.class);
-            		final Configuration jobConf = job.getConfiguration();
-            		jobConf.set("mapreduce.output.textoutputformat.separator", ",");
+		while(height < maxHeight) {
+			Configuration conf = getConf();
+			Job job = Job.getInstance(conf, "Decision Tree");
+			job.setJarByClass(Driver.class);
+			final Configuration jobConf = job.getConfiguration();
+			jobConf.set("mapreduce.output.textoutputformat.separator", ",");
 			
 			job.setMapperClass(AttributeSelectionMapper.class);
-            		job.setReducerClass(SelectReducer.class);
-            		job.setNumReduceTasks(1);
+			job.setPartitionerClass(SplitPartitioner.class);
+			job.setReducerClass(SelectReducer.class);
+
 
  			job.setOutputKeyClass(IntWritable.class);
-            		job.setOutputValueClass(SelectMapperWritable.class);
-
+ 			job.setOutputValueClass(Text.class);
 
 
  			FileInputFormat.addInputPath(job, inputPath);
-            		FileOutputFormat.setOutputPath(job, tempOutput);
-
-
+ 			FileOutputFormat.setOutputPath(job, tempOutput);
 
  			job.waitForCompletion(true);
 
- 			long cutpoint = job.getCounters().findCounter(SPLIT_COUNTER.CUTPOINT).getValue();
-            		double finalCutpoint = (double) cutpoint / 100000;
-            		System.out.println(finalCutpoint);
-
- 			long selectedAttribute = job.getCounters().findCounter(SPLIT_COUNTER.ATTRIBUTE_COLUMN).getValue();
-            		System.out.println(selectedAttribute);
             
 			Configuration confTwo = getConf();
 
-            		Job jobTwo = Job.getInstance(confTwo, "Decision Tree Building");
-            		jobTwo.setJarByClass(Driver.class);
-            		Configuration jobConfigTwo = jobTwo.getConfiguration();
-            		jobConfigTwo.set("mapreduce.output.textoutputformat.separator", ",");
-
-
- 			jobConfigTwo.setLong("selectedAttribute", selectedAttribute);
-            		jobConfigTwo.setDouble("selectedAttributeCutPoint", finalCutpoint);
-            		jobConfigTwo.setFloat("minProbability", 0.90f);
-            		jobConfigTwo.setInt("maxRecordsInPartition", 2);
+			Job jobTwo = Job.getInstance(confTwo, "Decision Tree Building");
+			jobTwo.setJarByClass(Driver.class);
+			Configuration jobConfigTwo = jobTwo.getConfiguration();
+			jobConfigTwo.set("mapreduce.output.textoutputformat.separator", ",");
 
  			jobTwo.setMapperClass(SplitMapper.class);
-            		jobTwo.setReducerClass(SplitReducer.class);
+ 			jobTwo.setReducerClass(SplitReducer.class);
 			jobTwo.setPartitionerClass(SplitPartitioner.class);
 
- 			FileInputFormat.addInputPath(jobTwo, inputPath);
-            		FileOutputFormat.setOutputPath(jobTwo, outputPath);
-			
-            		jobTwo.waitForCompletion(true);
-            		partitions = jobTwo.getCounters().findCounter(SPLIT_COUNTER.PARTITIONS).getValue();
-            		System.out.println("party" + partitions);
-				jobTwo.getCounters().findCounter(SPLIT_COUNTER.PARTITIONS).setValue(0);
+			FileInputFormat.addInputPath(jobTwo, inputPath);
+			FileOutputFormat.setOutputPath(jobTwo, outputPath);
+
+//				FileSystem fs = FileSystem.get(new URI("hdfs://localhost:9000/"), conf);
+//				FileStatus[] fileStatus = fs.listStatus(new Path("hdfs://localhost:9000/"));
+//				for(FileStatus status : fileStatus){
+//					jobTwo.addCacheFile(new URI(status.getPath().toString()));
+//				}
+
+			job.addCacheFile(new URI ( "tempo"+ "/" + height + "#filelabel"));
+
+			jobTwo.waitForCompletion(true);
 
  			inputPath = new Path(args[1] +"/" +height +"/data");
             		height++;
             		outputPath = new Path(args[1] + "/" + height);
             		tempOutput = new Path("tempo"+ "/" + height);
-
 
         	}
 
