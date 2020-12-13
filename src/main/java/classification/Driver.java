@@ -28,12 +28,12 @@ public class Driver extends Configured implements Tool {
 	@Override
 	public int run(final String[] args) throws Exception {
 
-		int maxHeight = 1;
+		int maxHeight = 2;
 		int height = 0;
 
 		Path inputPath = new Path(args[0]);
 		Path outputPath = new Path(args[1] + "/0");
-
+		Path tempOutput = new Path("tempo"+ "/" + height);
 
 		while(height < maxHeight) {
 			Configuration conf = getConf();
@@ -44,13 +44,14 @@ public class Driver extends Configured implements Tool {
 
 			job.setMapperClass(AttributeSelectionMapper.class);
 			job.setReducerClass(SelectReducer.class);
+			job.setNumReduceTasks(1);
 
 
 			job.setOutputKeyClass(IntWritable.class);
 			job.setOutputValueClass(SelectMapperWritable.class);
 
 			FileInputFormat.addInputPath(job, inputPath);
-			FileOutputFormat.setOutputPath(job, new Path("tempo"));
+			FileOutputFormat.setOutputPath(job, tempOutput);
 
 			job.waitForCompletion(true);
 
@@ -78,14 +79,14 @@ public class Driver extends Configured implements Tool {
 
 			FileInputFormat.addInputPath(jobTwo, inputPath);
 			FileOutputFormat.setOutputPath(jobTwo, outputPath);
-
-			MultipleOutputs.addNamedOutput(jobTwo, "tree", TextOutputFormat.class, LongWritable.class, Text.class);
-			MultipleOutputs.addNamedOutput(jobTwo, "data", TextOutputFormat.class, Text.class, Text.class);
-			
 			jobTwo.waitForCompletion(true);
-			
-			height++;
 
+
+
+			inputPath = new Path(args[1] + "/" + height);
+			height++;
+			outputPath = new Path(args[1] + "/" + height);
+			tempOutput = new Path("tempo"+ "/" + height);
 		}
 		return 1;
 	}
