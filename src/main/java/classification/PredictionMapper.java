@@ -28,6 +28,7 @@ public class PredictionMapper extends Mapper<LongWritable, Text, IntWritable, In
 	@Override
 	public void setup(Context context) throws IOException {
 		
+		multipleOutputs = new MultipleOutputs(context);
 		BufferedReader reader = null;
 		try {
 			//Checking DistributedCache for files
@@ -80,6 +81,8 @@ public class PredictionMapper extends Mapper<LongWritable, Text, IntWritable, In
 		
 		Double predictedValue = Double.parseDouble(Helper.makePrediction(instance.toString(), decisionTree, ONE));
 		
+		multipleOutputs.write("PREDICTION",predictedValue.toString(),instance ,"Prediction");
+		
 		if(predictedValue == Double.parseDouble(instanceValues[0])) {
 			context.write(new IntWritable(1), new IntWritable(1));
 		}
@@ -89,6 +92,11 @@ public class PredictionMapper extends Mapper<LongWritable, Text, IntWritable, In
 		
 
 	}
+	
+	@Override
+    protected void cleanup(Context context) throws IOException, InterruptedException {
+        multipleOutputs.close();
+    }
 	
 
 
