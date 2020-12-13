@@ -1,6 +1,7 @@
 package classification;
 
 import classification.utility.Node;
+import classification.utility.SPLIT_COUNTER;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
@@ -15,7 +16,9 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
     private final IntWritable result = new IntWritable();
@@ -29,6 +32,7 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
     boolean isRightLeafNode;
     int leftMaxCountClass;
     int rightMaxCountClass;
+    Map<Integer, Node> parentChildren;
 
     @Override
     public void setup(Context context) {
@@ -43,6 +47,7 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
         leftMaxCountClass = -1;
         rightMaxCountClass = -1;
         System.out.println("Just to check");
+        parentChildren = new HashMap<>();
     }
 
     @Override
@@ -95,9 +100,9 @@ public class SplitReducer extends Reducer<LongWritable, Text, Text, Text> {
 
         if((maxCount/((float)total)) <= minProbability && total >= maxRecordsInPartition && k > 1) {
         mitr.reset();
-
+            context.getCounter(SPLIT_COUNTER.PARTITIONS).increment(1);
             while (mitr.hasNext()) {
-                mos.write(NullWritable.get(), new Text(mitr.next().toString() +"," + childId), "data/partition");
+                mos.write(NullWritable.get(), new Text(mitr.next().toString() +"," + childId), "data/partition" + key);
             }
         }
         else {
