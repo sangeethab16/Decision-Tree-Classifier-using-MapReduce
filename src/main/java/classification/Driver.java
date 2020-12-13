@@ -58,6 +58,8 @@ public class Driver extends Configured implements Tool {
  			FileInputFormat.addInputPath(job, inputPath);
             		FileOutputFormat.setOutputPath(job, tempOutput);
 
+
+
  			job.waitForCompletion(true);
 
  			long cutpoint = job.getCounters().findCounter(SPLIT_COUNTER.CUTPOINT).getValue();
@@ -82,6 +84,7 @@ public class Driver extends Configured implements Tool {
 
  			jobTwo.setMapperClass(SplitMapper.class);
             		jobTwo.setReducerClass(SplitReducer.class);
+			jobTwo.setPartitionerClass(SplitPartitioner.class);
 
  			FileInputFormat.addInputPath(jobTwo, inputPath);
             		FileOutputFormat.setOutputPath(jobTwo, outputPath);
