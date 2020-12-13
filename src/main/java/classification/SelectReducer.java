@@ -22,15 +22,18 @@ public class SelectReducer extends Reducer<IntWritable, SelectMapperWritable, In
         float ratio = 0.0f;
         int totalValueCount = 0;
         double cutPointSum = 0.0;
-
+        
+        ////add all partial ratios, cutpoints 
         for (final SelectMapperWritable val : values) {
             ratio += val.getRatio().get();
             cutPointSum += val.getAttributeValue().get();
             totalValueCount += 1;
         }
-
+        
+        //calculate average of cutpoint
         double cutPointAvg = cutPointSum / totalValueCount ;
 
+        //add the ratio and cutpoint for key attribute
         ratioCutPointMap.put(key.get(), new RatioCutPoint(ratio, cutPointAvg));
     }
 
@@ -40,6 +43,7 @@ public class SelectReducer extends Reducer<IntWritable, SelectMapperWritable, In
         int selectedAttribute = -1;
         double selectedAttributeCutPoint = 0.0;
 
+        //iterate the map to find the attribute having maximum gain ratio
         for(Map.Entry<Integer, RatioCutPoint> ratioCutPointEntry : ratioCutPointMap.entrySet()) {
             if(ratioCutPointEntry.getValue().getRatio() > maxRatio) {
                 selectedAttribute = ratioCutPointEntry.getKey();
