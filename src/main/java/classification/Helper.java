@@ -51,5 +51,41 @@ public class Helper {
 		info = info * -1;
 		return info;
 	}
+	
+	public static String makePrediction(String instance, Map<Integer, Node> decisionTree, Integer rootID) {
+		
+		String[] instanceValues = instance.split(",");
+		Node rootNode = decisionTree.get(rootID);
+		String predictedValue = null;
+		
+		
+		if (Float.parseFloat(instanceValues[rootNode.getAttribute()]) <= rootNode.getCutPoint()) {
+			
+			if (rootNode.getLeftFlag().equals("false")) {
+				
+				
+				predictedValue = makePrediction(instance, decisionTree, rootNode.getLeftChild());
+			}
+			
+			else {
+				predictedValue = rootNode.getLeftChild().toString();
+			}
+		}
+		
+		else {
+			
+			if (rootNode.getRightFlag().equals("false")) {
+				
+				predictedValue = makePrediction(instance, decisionTree, rootNode.getRightChild());
+			}
+			
+			else {
+				predictedValue = rootNode.getRightChild().toString();
+			}
+		}
+		
+		return predictedValue;
+		
+	}
 
 }
