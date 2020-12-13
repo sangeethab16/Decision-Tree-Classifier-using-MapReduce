@@ -2,6 +2,9 @@ package classification;
 
 import java.io.Console;
 import java.io.IOException;
+
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.log4j.Logger;
 
 import classification.utility.SPLIT_COUNTER;
@@ -49,6 +52,8 @@ public class Driver extends Configured implements Tool {
 
 			job.setOutputKeyClass(IntWritable.class);
 			job.setOutputValueClass(SelectMapperWritable.class);
+			job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
 
 			FileInputFormat.addInputPath(job, inputPath);
 			FileOutputFormat.setOutputPath(job, tempOutput);
@@ -68,6 +73,7 @@ public class Driver extends Configured implements Tool {
 			jobTwo.setJarByClass(Driver.class);
 			Configuration jobConfigTwo = jobTwo.getConfiguration();
 			jobConfigTwo.set("mapreduce.output.textoutputformat.separator", ",");
+			jobTwo.setInputFormatClass(SequenceFileInputFormat.class);
 
 			jobConfigTwo.setLong("selectedAttribute", selectedAttribute);
 			jobConfigTwo.setDouble("selectedAttributeCutPoint", finalCutpoint);
@@ -80,7 +86,6 @@ public class Driver extends Configured implements Tool {
 			FileInputFormat.addInputPath(jobTwo, inputPath);
 			FileOutputFormat.setOutputPath(jobTwo, outputPath);
 			jobTwo.waitForCompletion(true);
-
 
 
 			inputPath = new Path(args[1] + "/" + height);
