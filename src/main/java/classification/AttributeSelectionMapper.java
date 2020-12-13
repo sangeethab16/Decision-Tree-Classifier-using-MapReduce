@@ -40,6 +40,7 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, IntWrit
 			return;
 		}
 		
+		//split the instance into separate values where each instance has n attributes
 		String[] instanceValues = instance.toString().split(",");
 		
 		for (int i = 0; i < instanceValues.length; i++) {
@@ -85,8 +86,11 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, IntWrit
 			if (entry.getKey() == 0) {
 				continue;
 			}
+			//sort the values and store them in a new list
 			List<InstanceValue> attrValList = entry.getValue();
 			Collections.sort(attrValList, new SortByValue());
+			
+			//find all cut-points from the formula
 			List<Double> cpList = new ArrayList<Double>();
 			
 			for(int i = 0; i < attrValList.size()-1; i++) {
@@ -98,9 +102,10 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, IntWrit
 			float split;
 			float ratio = 0;
 			
-			
+			//for each cut-point
 			for(int i = 0; i< cpList.size(); i++) {
 				
+				//sort the cut-points by the attributes’ values
 				List<InstanceValue> attrValLessCP = new ArrayList<InstanceValue>();
 				List<InstanceValue> attrValGreaterCP = new ArrayList<InstanceValue>();
 				
@@ -121,28 +126,29 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, IntWrit
 					
 				}
 				
+				//calculate partial information gain
 				float Xij1 = ((float)attrValLessCP.size())/attrValList.size();
 				float Xij2 = ((float)attrValGreaterCP.size())/attrValList.size();
 				
 				Float gain = infoDataset - (Xij1 * Helper.infoCalc(uniqueClassLabels, attrValLessCP) + 
 						Xij2 * Helper.infoCalc(uniqueClassLabels, attrValGreaterCP));
 				if (gain > maxGain) {
+					//calculate maximum gain for attribute
 					maxGain = gain;
 					maxGainCP = cpList.get(i);
 					float prop1 = ((float)attrValLessCP.size()/attrValList.size());
 					float prop2 = ((float)attrValGreaterCP.size()/attrValList.size());
 					split = (prop1 * (float) (Math.log(prop1) / Math.log(2))) + (prop2 * (float) (Math.log(prop2) / Math.log(2)));
-					split = (float) (split * -1.0);
+					split =// (float) (split * -1.0);
+					//calculate the gain ratio
 					ratio = gain / split;
 				}
 				
 				
 			}
+			//write the <attribute, [gain ratio, cut point]> for that attribute to reducer
 			context.write(new IntWritable(entry.getKey()), new SelectMapperWritable(new FloatWritable(ratio),new DoubleWritable(maxGainCP)));
-
-			
-			
-			
+	
 		}	
 		
 	}
