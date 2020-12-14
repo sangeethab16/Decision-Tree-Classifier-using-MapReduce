@@ -9,6 +9,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Comparator;
 
+// helper class to store the value of an element and it's classlabel.This is used during Attribute selection.
 public class InstanceValue {
 
     private Double value;
