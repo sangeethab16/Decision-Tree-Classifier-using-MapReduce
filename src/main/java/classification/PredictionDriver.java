@@ -40,13 +40,13 @@ public class PredictionDriver extends Configured implements Tool {
 		int i = 0;
 		FileSystem fs = FileSystem.get(conf);
 		RemoteIterator<LocatedFileStatus> fileStatusListIterator = fs.listFiles(
-	            new Path(args[2]), true);
+	            new Path(args[2]), true);		//Iterates all the files in directory recursively
 		while(fileStatusListIterator.hasNext()){
 			LocatedFileStatus fileStatus = fileStatusListIterator.next();
 			
 			if (fileStatus.getPath().toString().contains("decision")) {
 				System.out.println(fileStatus.getPath().toString());
-				job.addCacheFile(new URI(fileStatus.getPath().toString() + "#" + FILE_LABEL + (i++)));
+				job.addCacheFile(new URI(fileStatus.getPath().toString() + "#" + FILE_LABEL + (i++))); //Cache file is generated for every iteration
 			}
 
 		}
