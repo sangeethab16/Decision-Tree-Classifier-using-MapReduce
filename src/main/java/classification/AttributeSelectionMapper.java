@@ -7,13 +7,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -47,6 +45,7 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, S
 
 		for (int i = 0; i < instanceValues.length; i++) {
 			Double attrVal = Double.parseDouble(instanceValues[i]);
+			Integer nodeId;
 			
 			
 			
@@ -64,14 +63,17 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, S
 				attributeMetrics.put(i, attributeValues);
 			}
 			
+			if(instanceValues.length == 28) {
+				nodeId = 1;
+			}
+			else {
+				nodeId = Integer.parseInt(instanceValues[28]);
+			}
+				nodeAttributes.put(nodeId, attributeMetrics);
+			
 			
 		}
-		if(instanceValues.length == 28) {
-			nodeAttributes.put(new Integer("1"), attributeMetrics);
-		}
-		else {
-			nodeAttributes.put(new Integer(instanceValues[28]), attributeMetrics);
-		}
+
 
 	}
 
@@ -92,11 +94,8 @@ public class AttributeSelectionMapper extends Mapper<LongWritable, Text, Text, S
 			}
 
 			Set<String> uniqueClassLabels = new HashSet<String>(classLabels);
-			System.out.println("AAAAAAAAAA: " + uniqueClassLabels);
 
 			Float infoDataset = Helper.infoCalc(uniqueClassLabels, attributeMetrics.get(0));
-
-			System.out.println("INFO : " + infoDataset);
 			
 			for (Map.Entry<Integer, List<InstanceValue>> entry : attributeMetrics.entrySet()) {
 
