@@ -1,11 +1,14 @@
-# CS6240-MR-template
-Template for MR Java projects
+# CS6240-MR-Project
 
-Fall 2018
 
-Code author
+Fall 2020
+
+Code authors
 -----------
-Joe Sackett
+Sai Divya Sangeetha Bhagavatula
+Maanasa Kaza
+Prajakta Rodrigues
+Anugraha Venugopal
 
 Installation
 ------------
