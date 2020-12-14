@@ -1,0 +1,261 @@
+mvn clean package
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------------< cs6240:mr-demo >---------------------------
+[INFO] Building mr-demo 1.0
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ mr-demo ---
+[INFO] Deleting /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/target
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ mr-demo ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.0:compile (default-compile) @ mr-demo ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 19 source files to /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/target/classes
+[INFO] /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/src/main/java/classification/SplitReducer.java: Some input files use unchecked or unsafe operations.
+[INFO] /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/src/main/java/classification/SplitReducer.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ mr-demo ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.0:testCompile (default-testCompile) @ mr-demo ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.12.4:test (default-test) @ mr-demo ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ mr-demo ---
+[INFO] Building jar: /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/target/mr-demo-1.0.jar
+[INFO] 
+[INFO] --- maven-shade-plugin:3.1.1:shade (default) @ mr-demo ---
+[INFO] Including org.javatuples:javatuples:jar:1.2 in the shaded jar.
+[INFO] Replacing original artifact with shaded artifact.
+[INFO] Replacing /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/target/mr-demo-1.0.jar with /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/target/mr-demo-1.0-shaded.jar
+[INFO] Dependency-reduced POM written at: /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/dependency-reduced-pom.xml
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.693 s
+[INFO] Finished at: 2020-12-14T06:39:23-05:00
+[INFO] ------------------------------------------------------------------------
+#rm -rf output1*
+#rm -rf output*
+/usr/local/Cellar/hadoop/3.3.0/libexec/bin/hadoop jar target/mr-demo-1.0.jar classification.PredictionDriver input output1 output
+2020-12-14 06:39:24,889 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2020-12-14 06:39:25,606 INFO impl.MetricsConfig: Loaded properties from hadoop-metrics2.properties
+2020-12-14 06:39:30,681 INFO impl.MetricsSystemImpl: Scheduled Metric snapshot period at 10 second(s).
+2020-12-14 06:39:30,681 INFO impl.MetricsSystemImpl: JobTracker metrics system started
+2020-12-14 06:39:36,066 INFO input.FileInputFormat: Total input files to process : 1
+2020-12-14 06:39:36,115 INFO mapreduce.JobSubmitter: number of splits:1
+2020-12-14 06:39:36,242 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_local537670693_0001
+2020-12-14 06:39:36,242 INFO mapreduce.JobSubmitter: Executing with tokens: []
+2020-12-14 06:39:36,463 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_e966ae80-6ab9-474f-9c2e-8486c8405aff/tree1-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree0
+2020-12-14 06:39:36,476 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/0/decision/tree1-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_e966ae80-6ab9-474f-9c2e-8486c8405aff/tree1-r-00000
+2020-12-14 06:39:36,603 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_0552e2f4-678a-4c31-acad-070dd2b30000/tree11122122-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree1
+2020-12-14 06:39:36,610 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/7/decision/tree11122122-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_0552e2f4-678a-4c31-acad-070dd2b30000/tree11122122-r-00000
+2020-12-14 06:39:36,610 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_5a9aac6c-e644-4ad2-857e-cb3b4995b8dd/tree1112212-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree2
+2020-12-14 06:39:36,614 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/6/decision/tree1112212-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_5a9aac6c-e644-4ad2-857e-cb3b4995b8dd/tree1112212-r-00000
+2020-12-14 06:39:36,615 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_fd53592f-b9c4-4194-9280-e757d56d1cca/tree1121211-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree3
+2020-12-14 06:39:36,618 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/6/decision/tree1121211-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_fd53592f-b9c4-4194-9280-e757d56d1cca/tree1121211-r-00000
+2020-12-14 06:39:36,619 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_d6ccfb15-559e-4322-b49c-25708727cd0c/tree11-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree4
+2020-12-14 06:39:36,622 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/1/decision/tree11-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_d6ccfb15-559e-4322-b49c-25708727cd0c/tree11-r-00000
+2020-12-14 06:39:36,623 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_91c04b11-c8a7-41cd-8d4b-d6bc73b6c8f9/tree111221221-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree5
+2020-12-14 06:39:36,627 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/8/decision/tree111221221-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_91c04b11-c8a7-41cd-8d4b-d6bc73b6c8f9/tree111221221-r-00000
+2020-12-14 06:39:36,627 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_82d315c0-9762-4c06-99ce-c1f80184d710/tree11122-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree6
+2020-12-14 06:39:36,631 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/4/decision/tree11122-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_82d315c0-9762-4c06-99ce-c1f80184d710/tree11122-r-00000
+2020-12-14 06:39:36,631 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_58f93588-9ac8-4273-8417-73f2560a1113/tree11212-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree7
+2020-12-14 06:39:36,635 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/4/decision/tree11212-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_58f93588-9ac8-4273-8417-73f2560a1113/tree11212-r-00000
+2020-12-14 06:39:36,636 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_b0fd1d21-2c82-4e61-9bdf-0097133b833e/tree1121-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree8
+2020-12-14 06:39:36,641 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/3/decision/tree1121-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_b0fd1d21-2c82-4e61-9bdf-0097133b833e/tree1121-r-00000
+2020-12-14 06:39:36,641 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_3110fe9f-fbcf-4052-9888-1b9eef49c894/tree1112-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree9
+2020-12-14 06:39:36,645 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/3/decision/tree1112-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_3110fe9f-fbcf-4052-9888-1b9eef49c894/tree1112-r-00000
+2020-12-14 06:39:36,645 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_8c1cd0cf-e662-4e11-ac6e-94095fd45907/tree111-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree10
+2020-12-14 06:39:36,649 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/2/decision/tree111-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_8c1cd0cf-e662-4e11-ac6e-94095fd45907/tree111-r-00000
+2020-12-14 06:39:36,649 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_8908f838-0223-42af-97ff-293ce8153f22/tree112-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree11
+2020-12-14 06:39:36,653 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/2/decision/tree112-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_8908f838-0223-42af-97ff-293ce8153f22/tree112-r-00000
+2020-12-14 06:39:36,653 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_295f0567-e83d-493b-ad95-c89c491ef9f4/tree112121-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree12
+2020-12-14 06:39:36,657 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/5/decision/tree112121-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_295f0567-e83d-493b-ad95-c89c491ef9f4/tree112121-r-00000
+2020-12-14 06:39:36,657 INFO mapred.LocalDistributedCacheManager: Creating symlink: /tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_2aec3952-44ec-4d14-b553-07125049226a/tree111221-r-00000 <- /Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/Tree13
+2020-12-14 06:39:36,661 INFO mapred.LocalDistributedCacheManager: Localized file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output/5/decision/tree111221-r-00000 as file:/tmp/hadoop-maanasakaza/mapred/local/job_local537670693_0001_2aec3952-44ec-4d14-b553-07125049226a/tree111221-r-00000
+2020-12-14 06:39:36,729 INFO mapreduce.Job: The url to track the job: http://localhost:8080/
+2020-12-14 06:39:36,730 INFO mapreduce.Job: Running job: job_local537670693_0001
+2020-12-14 06:39:36,731 INFO mapred.LocalJobRunner: OutputCommitter set in config null
+2020-12-14 06:39:36,737 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 2
+2020-12-14 06:39:36,737 INFO output.FileOutputCommitter: FileOutputCommitter skip cleanup _temporary folders under output directory:false, ignore cleanup failures: false
+2020-12-14 06:39:36,738 INFO mapred.LocalJobRunner: OutputCommitter is org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter
+2020-12-14 06:39:36,778 INFO mapred.LocalJobRunner: Waiting for map tasks
+2020-12-14 06:39:36,778 INFO mapred.LocalJobRunner: Starting task: attempt_local537670693_0001_m_000000_0
+2020-12-14 06:39:36,803 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 2
+2020-12-14 06:39:36,803 INFO output.FileOutputCommitter: FileOutputCommitter skip cleanup _temporary folders under output directory:false, ignore cleanup failures: false
+2020-12-14 06:39:36,813 INFO util.ProcfsBasedProcessTree: ProcfsBasedProcessTree currently is supported only on Linux.
+2020-12-14 06:39:36,813 INFO mapred.Task:  Using ResourceCalculatorProcessTree : null
+2020-12-14 06:39:36,817 INFO mapred.MapTask: Processing split: file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/input/test-sample.csv:0+55933
+2020-12-14 06:39:36,881 INFO mapred.MapTask: (EQUATOR) 0 kvi 26214396(104857584)
+2020-12-14 06:39:36,881 INFO mapred.MapTask: mapreduce.task.io.sort.mb: 100
+2020-12-14 06:39:36,881 INFO mapred.MapTask: soft limit at 83886080
+2020-12-14 06:39:36,881 INFO mapred.MapTask: bufstart = 0; bufvoid = 104857600
+2020-12-14 06:39:36,881 INFO mapred.MapTask: kvstart = 26214396; length = 6553600
+2020-12-14 06:39:36,884 INFO mapred.MapTask: Map output collector class = org.apache.hadoop.mapred.MapTask$MapOutputBuffer
+1,7,-0.133,false,11,true,1
+11122122,3,-1.655,false,111221221,true,1
+1112212,16,1.675,true,1,false,11122122
+1121211,1,-1.0465,true,0,true,1
+11,27,-0.06165,false,111,false,112
+111221221,4,1.51,true,1,true,0
+11122,20,-1.225,false,111221,true,1
+11212,19,0.279,false,112121,true,1
+1121,7,0.562,true,0,false,11212
+1112,26,1.39,true,0,false,11122
+111,8,-1.39,true,0,false,1112
+112,2,-1.405,false,1121,true,0
+112121,13,-0.317,false,1121211,true,1
+111221,2,0.288,true,1,false,1112212
+2020-12-14 06:39:36,900 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 2
+2020-12-14 06:39:36,900 INFO output.FileOutputCommitter: FileOutputCommitter skip cleanup _temporary folders under output directory:false, ignore cleanup failures: false
+2020-12-14 06:39:36,936 INFO mapred.LocalJobRunner: 
+2020-12-14 06:39:36,936 INFO mapred.MapTask: Starting flush of map output
+2020-12-14 06:39:36,936 INFO mapred.MapTask: Spilling map output
+2020-12-14 06:39:36,936 INFO mapred.MapTask: bufstart = 0; bufend = 1672; bufvoid = 104857600
+2020-12-14 06:39:36,936 INFO mapred.MapTask: kvstart = 26214396(104857584); kvend = 26213564(104854256); length = 833/6553600
+2020-12-14 06:39:36,953 INFO mapred.MapTask: Finished spill 0
+2020-12-14 06:39:36,966 INFO mapred.Task: Task:attempt_local537670693_0001_m_000000_0 is done. And is in the process of committing
+2020-12-14 06:39:36,967 INFO mapred.LocalJobRunner: 
+2020-12-14 06:39:36,967 INFO mapred.Task: Task attempt_local537670693_0001_m_000000_0 is allowed to commit now
+2020-12-14 06:39:36,968 INFO output.FileOutputCommitter: Saved output of task 'attempt_local537670693_0001_m_000000_0' to file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output1
+2020-12-14 06:39:36,969 INFO mapred.LocalJobRunner: map
+2020-12-14 06:39:36,969 INFO mapred.Task: Task 'attempt_local537670693_0001_m_000000_0' done.
+2020-12-14 06:39:37,011 INFO mapred.Task: Final Counters for attempt_local537670693_0001_m_000000_0: Counters: 17
+	File System Counters
+		FILE: Number of bytes read=156382
+		FILE: Number of bytes written=785398
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+	Map-Reduce Framework
+		Map input records=210
+		Map output records=209
+		Map output bytes=1672
+		Map output materialized bytes=2096
+		Input split bytes=157
+		Combine input records=0
+		Spilled Records=209
+		Failed Shuffles=0
+		Merged Map outputs=0
+		GC time elapsed (ms)=0
+		Total committed heap usage (bytes)=270532608
+	File Input Format Counters 
+		Bytes Read=55933
+2020-12-14 06:39:37,011 INFO mapred.LocalJobRunner: Finishing task: attempt_local537670693_0001_m_000000_0
+2020-12-14 06:39:37,012 INFO mapred.LocalJobRunner: map task executor complete.
+2020-12-14 06:39:37,014 INFO mapred.LocalJobRunner: Waiting for reduce tasks
+2020-12-14 06:39:37,014 INFO mapred.LocalJobRunner: Starting task: attempt_local537670693_0001_r_000000_0
+2020-12-14 06:39:37,020 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 2
+2020-12-14 06:39:37,020 INFO output.FileOutputCommitter: FileOutputCommitter skip cleanup _temporary folders under output directory:false, ignore cleanup failures: false
+2020-12-14 06:39:37,020 INFO util.ProcfsBasedProcessTree: ProcfsBasedProcessTree currently is supported only on Linux.
+2020-12-14 06:39:37,021 INFO mapred.Task:  Using ResourceCalculatorProcessTree : null
+2020-12-14 06:39:37,025 INFO mapred.ReduceTask: Using ShuffleConsumerPlugin: org.apache.hadoop.mapreduce.task.reduce.Shuffle@6185c983
+2020-12-14 06:39:37,027 WARN impl.MetricsSystemImpl: JobTracker metrics system already initialized!
+2020-12-14 06:39:37,051 INFO reduce.MergeManagerImpl: MergerManager: memoryLimit=1336252800, maxSingleShuffleLimit=334063200, mergeThreshold=881926912, ioSortFactor=10, memToMemMergeOutputsThreshold=10
+2020-12-14 06:39:37,053 INFO reduce.EventFetcher: attempt_local537670693_0001_r_000000_0 Thread started: EventFetcher for fetching Map Completion Events
+2020-12-14 06:39:37,082 INFO reduce.LocalFetcher: localfetcher#1 about to shuffle output of map attempt_local537670693_0001_m_000000_0 decomp: 2092 len: 2096 to MEMORY
+2020-12-14 06:39:37,084 INFO reduce.InMemoryMapOutput: Read 2092 bytes from map-output for attempt_local537670693_0001_m_000000_0
+2020-12-14 06:39:37,085 INFO reduce.MergeManagerImpl: closeInMemoryFile -> map-output of size: 2092, inMemoryMapOutputs.size() -> 1, commitMemory -> 0, usedMemory ->2092
+2020-12-14 06:39:37,086 INFO reduce.EventFetcher: EventFetcher is interrupted.. Returning
+2020-12-14 06:39:37,086 INFO mapred.LocalJobRunner: 1 / 1 copied.
+2020-12-14 06:39:37,087 INFO reduce.MergeManagerImpl: finalMerge called with 1 in-memory map-outputs and 0 on-disk map-outputs
+2020-12-14 06:39:37,098 INFO mapred.Merger: Merging 1 sorted segments
+2020-12-14 06:39:37,098 INFO mapred.Merger: Down to the last merge-pass, with 1 segments left of total size: 2086 bytes
+2020-12-14 06:39:37,105 INFO reduce.MergeManagerImpl: Merged 1 segments, 2092 bytes to disk to satisfy reduce memory limit
+2020-12-14 06:39:37,105 INFO reduce.MergeManagerImpl: Merging 1 files, 2096 bytes from disk
+2020-12-14 06:39:37,106 INFO reduce.MergeManagerImpl: Merging 0 segments, 0 bytes from memory into reduce
+2020-12-14 06:39:37,106 INFO mapred.Merger: Merging 1 sorted segments
+2020-12-14 06:39:37,107 INFO mapred.Merger: Down to the last merge-pass, with 1 segments left of total size: 2086 bytes
+2020-12-14 06:39:37,107 INFO mapred.LocalJobRunner: 1 / 1 copied.
+2020-12-14 06:39:37,122 INFO Configuration.deprecation: mapred.skip.on is deprecated. Instead, use mapreduce.job.skiprecords
+2020-12-14 06:39:37,133 INFO mapred.Task: Task:attempt_local537670693_0001_r_000000_0 is done. And is in the process of committing
+2020-12-14 06:39:37,133 INFO mapred.LocalJobRunner: 1 / 1 copied.
+2020-12-14 06:39:37,133 INFO mapred.Task: Task attempt_local537670693_0001_r_000000_0 is allowed to commit now
+2020-12-14 06:39:37,134 INFO output.FileOutputCommitter: Saved output of task 'attempt_local537670693_0001_r_000000_0' to file:/Users/maanasakaza/Documents/Fall20/CS6240/project/project-group3/output1
+2020-12-14 06:39:37,135 INFO mapred.LocalJobRunner: reduce > reduce
+2020-12-14 06:39:37,135 INFO mapred.Task: Task 'attempt_local537670693_0001_r_000000_0' done.
+2020-12-14 06:39:37,135 INFO mapred.Task: Final Counters for attempt_local537670693_0001_r_000000_0: Counters: 26
+	File System Counters
+		FILE: Number of bytes read=160606
+		FILE: Number of bytes written=787502
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+	Map-Reduce Framework
+		Combine input records=0
+		Combine output records=0
+		Reduce input groups=2
+		Reduce shuffle bytes=2096
+		Reduce input records=209
+		Reduce output records=0
+		Spilled Records=209
+		Shuffled Maps =1
+		Failed Shuffles=0
+		Merged Map outputs=1
+		GC time elapsed (ms)=0
+		Total committed heap usage (bytes)=131596288
+	Shuffle Errors
+		BAD_ID=0
+		CONNECTION=0
+		IO_ERROR=0
+		WRONG_LENGTH=0
+		WRONG_MAP=0
+		WRONG_REDUCE=0
+	classification.CounterEnum
+		TOTAL=209
+		TRUE=180
+	File Output Format Counters 
+		Bytes Written=8
+2020-12-14 06:39:37,135 INFO mapred.LocalJobRunner: Finishing task: attempt_local537670693_0001_r_000000_0
+2020-12-14 06:39:37,135 INFO mapred.LocalJobRunner: reduce task executor complete.
+2020-12-14 06:39:37,739 INFO mapreduce.Job: Job job_local537670693_0001 running in uber mode : false
+2020-12-14 06:39:37,740 INFO mapreduce.Job:  map 100% reduce 100%
+2020-12-14 06:39:37,741 INFO mapreduce.Job: Job job_local537670693_0001 completed successfully
+2020-12-14 06:39:37,748 INFO mapreduce.Job: Counters: 32
+	File System Counters
+		FILE: Number of bytes read=316988
+		FILE: Number of bytes written=1572900
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+	Map-Reduce Framework
+		Map input records=210
+		Map output records=209
+		Map output bytes=1672
+		Map output materialized bytes=2096
+		Input split bytes=157
+		Combine input records=0
+		Combine output records=0
+		Reduce input groups=2
+		Reduce shuffle bytes=2096
+		Reduce input records=209
+		Reduce output records=0
+		Spilled Records=418
+		Shuffled Maps =1
+		Failed Shuffles=0
+		Merged Map outputs=1
+		GC time elapsed (ms)=0
+		Total committed heap usage (bytes)=402128896
+	Shuffle Errors
+		BAD_ID=0
+		CONNECTION=0
+		IO_ERROR=0
+		WRONG_LENGTH=0
+		WRONG_MAP=0
+		WRONG_REDUCE=0
+	classification.CounterEnum
+		TOTAL=209
+		TRUE=180
+	File Input Format Counters 
+		Bytes Read=55933
+	File Output Format Counters 
+		Bytes Written=8
+ACCURACY : 86.124405
