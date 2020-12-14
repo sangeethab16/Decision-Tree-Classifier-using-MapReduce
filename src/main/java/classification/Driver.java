@@ -35,7 +35,7 @@ public class Driver extends Configured implements Tool {
 
 	@Override
     	public int run(final String[] args) throws Exception {
-		int maxHeight = 3;
+		int maxHeight = 6;
         	int height = 0;
 		
 		Path inputPath = new Path(args[0]);
@@ -52,7 +52,7 @@ public class Driver extends Configured implements Tool {
 			job.setMapperClass(AttributeSelectionMapper.class);
 			job.setPartitionerClass(SplitPartitioner.class);
 			job.setReducerClass(SelectReducer.class);
-			job.setNumReduceTasks(2);
+			job.setNumReduceTasks((int)Math.pow(2.0,((double) height)));
 
 			job.setMapOutputKeyClass(Text.class);
 			job.setMapOutputValueClass(SelectMapperWritable.class);
@@ -109,6 +109,8 @@ public class Driver extends Configured implements Tool {
 				break;
 			}
         	}
+
+
 
 		return 1;
 	}
