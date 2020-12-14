@@ -5,6 +5,7 @@ import classification.utility.SPLIT_COUNTER;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
@@ -13,12 +14,18 @@ import java.util.Map;
 
 
 //input is of the form key = Ak, [(Xj/Ak, CutPoint Xj), (Xj+1/Ak, CutPoint Xj+1), (Xj+2/Ak, CutPoint Xj+2)]
-public class SelectReducer extends Reducer<IntWritable, SelectMapperWritable, IntWritable, SelectMapperWritable> {
+public class SelectReducer extends Reducer<Text, SelectMapperWritable, IntWritable, Text> {
 
     Map<Integer, RatioCutPoint> ratioCutPointMap = new HashMap<>();
+    int parentId;
 
     @Override
-    public void reduce(final IntWritable key, final Iterable<SelectMapperWritable> values, final Context context) throws IOException, InterruptedException {
+    public void setup(Context context) {
+        parentId = -1;
+    }
+
+    @Override
+    public void reduce(final Text key, final Iterable<SelectMapperWritable> values, final Context context) throws IOException, InterruptedException {
         float ratio = 0.0f;
         int totalValueCount = 0;
         double cutPointSum = 0.0;
@@ -31,7 +38,11 @@ public class SelectReducer extends Reducer<IntWritable, SelectMapperWritable, In
 
         double cutPointAvg = cutPointSum / totalValueCount ;
 
-        ratioCutPointMap.put(key.get(), new RatioCutPoint(ratio, cutPointAvg));
+        parentId = Integer.parseInt(key.toString().split(",")[0]);
+
+        int column = Integer.parseInt(key.toString().split(",")[1]);
+
+        ratioCutPointMap.put(column, new RatioCutPoint(ratio, cutPointAvg));
     }
 
     @Override
@@ -50,13 +61,8 @@ public class SelectReducer extends Reducer<IntWritable, SelectMapperWritable, In
         IntWritable key = new IntWritable(selectedAttribute);
         DoubleWritable value1 = new DoubleWritable(selectedAttributeCutPoint);
         FloatWritable value2 = new FloatWritable(maxRatio);
-        SelectMapperWritable selectMapperWritable = new SelectMapperWritable(value2, value1);
 
-        long val = (long)(selectedAttributeCutPoint*100000);
-        context.getCounter(SPLIT_COUNTER.CUTPOINT).increment(val);
-
-        long selectedAttr = selectedAttribute;
-        context.getCounter(SPLIT_COUNTER.ATTRIBUTE_COLUMN).increment(selectedAttr);
+        context.write(new IntWritable(parentId), new Text(selectedAttributeCutPoint + "," + selectedAttribute));
     }
 
 }

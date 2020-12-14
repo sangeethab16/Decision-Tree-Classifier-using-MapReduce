@@ -2,7 +2,10 @@ package classification;
 
 import java.io.Console;
 import java.io.IOException;
+import java.net.URI;
 
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.log4j.Logger;
@@ -32,77 +35,85 @@ public class Driver extends Configured implements Tool {
 
 	@Override
     	public int run(final String[] args) throws Exception {
-		int maxHeight = 2;
+		int maxHeight = 3;
         	int height = 0;
 		
 		Path inputPath = new Path(args[0]);
-        	Path outputPath = new Path(args[1] + "/0");
-        	Path tempOutput = new Path("tempo"+ "/" + height);
+		Path outputPath = new Path(args[1] + "/0");
+		Path tempOutput = new Path(args[2]+ "/" + height);
 
-        	while(height < maxHeight) {
-            		Configuration conf = getConf();
-            		Job job = Job.getInstance(conf, "Decision Tree");
-            		job.setJarByClass(Driver.class);
-            		final Configuration jobConf = job.getConfiguration();
-            		jobConf.set("mapreduce.output.textoutputformat.separator", ",");
+		while(height < maxHeight) {
+			Configuration conf = getConf();
+			Job job = Job.getInstance(conf, "Decision Tree");
+			job.setJarByClass(Driver.class);
+			final Configuration jobConf = job.getConfiguration();
+			jobConf.set("mapreduce.output.textoutputformat.separator", ",");
 			
 			job.setMapperClass(AttributeSelectionMapper.class);
-            		job.setReducerClass(SelectReducer.class);
-            		job.setNumReduceTasks(1);
+			job.setPartitionerClass(SplitPartitioner.class);
+			job.setReducerClass(SelectReducer.class);
+			job.setNumReduceTasks(2);
+
+			job.setMapOutputKeyClass(Text.class);
+			job.setMapOutputValueClass(SelectMapperWritable.class);
 
  			job.setOutputKeyClass(IntWritable.class);
-            		job.setOutputValueClass(SelectMapperWritable.class);
-
+ 			job.setOutputValueClass(Text.class);
 
 
  			FileInputFormat.addInputPath(job, inputPath);
-            		FileOutputFormat.setOutputPath(job, tempOutput);
+ 			FileOutputFormat.setOutputPath(job, tempOutput);
 
  			job.waitForCompletion(true);
 
- 			long cutpoint = job.getCounters().findCounter(SPLIT_COUNTER.CUTPOINT).getValue();
-            		double finalCutpoint = (double) cutpoint / 100000;
-            		System.out.println(finalCutpoint);
-
- 			long selectedAttribute = job.getCounters().findCounter(SPLIT_COUNTER.ATTRIBUTE_COLUMN).getValue();
-            		System.out.println(selectedAttribute);
             
 			Configuration confTwo = getConf();
 
-            		Job jobTwo = Job.getInstance(confTwo, "Decision Tree Building");
-            		jobTwo.setJarByClass(Driver.class);
-            		Configuration jobConfigTwo = jobTwo.getConfiguration();
-            		jobConfigTwo.set("mapreduce.output.textoutputformat.separator", ",");
+			Job jobTwo = Job.getInstance(confTwo, "Decision Tree Building");
+			jobTwo.setJarByClass(Driver.class);
+			Configuration jobConfigTwo = jobTwo.getConfiguration();
+			jobConfigTwo.set("mapreduce.output.textoutputformat.separator", ",");
 
-
- 			jobConfigTwo.setLong("selectedAttribute", selectedAttribute);
-            		jobConfigTwo.setDouble("selectedAttributeCutPoint", finalCutpoint);
-            		jobConfigTwo.setFloat("minProbability", 0.90f);
-            		jobConfigTwo.setInt("maxRecordsInPartition", 2);
+			jobConfigTwo.setFloat("minProbability", 0.90f);
+			jobConfigTwo.setInt("maxRecordsInPartition", 2);
 
  			jobTwo.setMapperClass(SplitMapper.class);
-            		jobTwo.setReducerClass(SplitReducer.class);
+ 			jobTwo.setReducerClass(SplitReducer.class);
+			jobTwo.setPartitionerClass(SplitPartitioner.class);
 
- 			FileInputFormat.addInputPath(jobTwo, inputPath);
-            		FileOutputFormat.setOutputPath(jobTwo, outputPath);
-			
-            		jobTwo.waitForCompletion(true);
-            		partitions = jobTwo.getCounters().findCounter(SPLIT_COUNTER.PARTITIONS).getValue();
-            		System.out.println("party" + partitions);
-				jobTwo.getCounters().findCounter(SPLIT_COUNTER.PARTITIONS).setValue(0);
+
+
+			jobTwo.setOutputKeyClass(Text.class);
+			jobTwo.setOutputValueClass(Text.class);
+
+			FileInputFormat.addInputPath(jobTwo, inputPath);
+			FileOutputFormat.setOutputPath(jobTwo, outputPath);
+
+			int i = 0;
+				FileSystem fs = FileSystem.get(conf);
+				FileStatus[] fileStatus = fs.listStatus(new Path(args[2]+ "/" + height));
+				for(FileStatus status : fileStatus){
+					jobTwo.addCacheFile(new URI(status.getPath().toString() + "#filelabel" + (i++)));
+				}
+			jobTwo.getConfiguration().setInt("FilesTotal", i);
+
+//			jobTwo.addCacheFile(new URI ( args[2]+ "/" + height + "#filelabel"));
+
+			jobTwo.waitForCompletion(true);
 
  			inputPath = new Path(args[1] +"/" +height +"/data");
             		height++;
             		outputPath = new Path(args[1] + "/" + height);
-            		tempOutput = new Path("tempo"+ "/" + height);
-
-
+            		tempOutput = new Path(args[2]+ "/" + height);
+			if(!fs.exists(inputPath)) {
+				break;
+			}
         	}
 
 		return 1;
 	}
 	public static void main(final String[] args) {
-		if (args.length != 2) {
+		if (args.length != 3) {
 			throw new Error("Two arguments required:\n<input-dir> <output-dir>");
         	}
 		

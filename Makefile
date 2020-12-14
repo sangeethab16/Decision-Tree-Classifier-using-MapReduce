@@ -8,6 +8,7 @@ jar.path=target/${jar.name}
 job.name=classification.Driver
 local.input=input/sample.csv
 local.output=output
+local.inoutput=tempo
 # Pseudo-Cluster Execution
 hdfs.user.name=prajaktarods
 hdfs.input=input
@@ -19,6 +20,7 @@ aws.bucket.name=mr-median
 aws.subnet.id=subnet-6356553a
 aws.input=input/sample.csv
 aws.output=output
+aws.inoutput=s3://pvrod/tempo
 aws.log.dir=log
 aws.num.nodes=1
 aws.instance.type=m3.xlarge
@@ -31,12 +33,13 @@ jar:
 # Removes local output directory.
 clean-local-output:
 	rm -rf ${local.output}*
+	rm -rf ${local.inoutput}*
 
 # Runs standalone
 # Make sure Hadoop  is set up (in /etc/hadoop files) for standalone operation (not pseudo-cluster).
 # https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/SingleCluster.html#Standalone_Operation
 local: jar clean-local-output
-	${hadoop.root}/bin/hadoop jar ${jar.path} ${job.name} ${local.input} ${local.output}
+	${hadoop.root}/bin/hadoop jar ${jar.path} ${job.name} ${local.input} ${local.output} ${local.inoutput}
 
 # Start HDFS
 start-hdfs:

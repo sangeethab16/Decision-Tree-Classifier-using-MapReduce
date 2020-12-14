@@ -23,6 +23,11 @@ public class Node {
 
 	}
 
+	public Node() {
+		leftFlag = "false";
+		rightFlag = "false";
+	}
+
 	public Integer getLeftChild() {
 		return leftChild;
 	}
