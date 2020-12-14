@@ -151,7 +151,7 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
                 if(parentKey!=1) {
                     val = val.substring(0, val.lastIndexOf(","));
                 }
-                mos.write(NullWritable.get(), new Text(val +"," + childId), "data/partition" + key);
+                mos.write("data", NullWritable.get(), new Text(val +"," + childId), "data/partition" + key);
             }
         }
         else {
@@ -182,7 +182,7 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
         res.append(entry.getValue().getLeftFlag() + "," + entry.getValue().getLeftChild() + ",");
         res.append(entry.getValue().getRightFlag() + "," + entry.getValue().getRightChild());
 
-        mos.write(new LongWritable(entry.getKey()), new Text(res.toString()), "decision/tree" + parentKey);
+        mos.write("decision", new LongWritable(entry.getKey()), new Text(res.toString()), "decision/tree" + entry.getKey());
 
     }
         mos.close();
