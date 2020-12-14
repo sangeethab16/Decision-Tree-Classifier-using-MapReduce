@@ -1,4 +1,6 @@
 # CS6240-MR-Project
+# Classification of Particle Collisions’ Output using a Decision Tree - C4.5 Algorithm
+
 
 
 Fall 2020
