@@ -35,12 +35,12 @@ public class Driver extends Configured implements Tool {
 
 	@Override
     	public int run(final String[] args) throws Exception {
-		int maxHeight = 2;
+		int maxHeight = 3;
         	int height = 0;
 		
 		Path inputPath = new Path(args[0]);
 		Path outputPath = new Path(args[1] + "/0");
-		Path tempOutput = new Path("tempo"+ "/" + height);
+		Path tempOutput = new Path(args[2]+ "/" + height);
 
 		while(height < maxHeight) {
 			Configuration conf = getConf();
@@ -53,6 +53,8 @@ public class Driver extends Configured implements Tool {
 			job.setPartitionerClass(SplitPartitioner.class);
 			job.setReducerClass(SelectReducer.class);
 
+			job.setMapOutputKeyClass(Text.class);
+			job.setMapOutputValueClass(SelectMapperWritable.class);
 
  			job.setOutputKeyClass(IntWritable.class);
  			job.setOutputValueClass(Text.class);
@@ -71,34 +73,46 @@ public class Driver extends Configured implements Tool {
 			Configuration jobConfigTwo = jobTwo.getConfiguration();
 			jobConfigTwo.set("mapreduce.output.textoutputformat.separator", ",");
 
+			jobConfigTwo.setFloat("minProbability", 0.90f);
+			jobConfigTwo.setInt("maxRecordsInPartition", 2);
+
  			jobTwo.setMapperClass(SplitMapper.class);
  			jobTwo.setReducerClass(SplitReducer.class);
 			jobTwo.setPartitionerClass(SplitPartitioner.class);
 
+
+
+			jobTwo.setOutputKeyClass(Text.class);
+			jobTwo.setOutputValueClass(Text.class);
+
 			FileInputFormat.addInputPath(jobTwo, inputPath);
 			FileOutputFormat.setOutputPath(jobTwo, outputPath);
 
-//				FileSystem fs = FileSystem.get(new URI("hdfs://localhost:9000/"), conf);
-//				FileStatus[] fileStatus = fs.listStatus(new Path("hdfs://localhost:9000/"));
-//				for(FileStatus status : fileStatus){
-//					jobTwo.addCacheFile(new URI(status.getPath().toString()));
-//				}
+			int i = 0;
+				FileSystem fs = FileSystem.get(conf);
+				FileStatus[] fileStatus = fs.listStatus(new Path(args[2]+ "/" + height));
+				for(FileStatus status : fileStatus){
+					jobTwo.addCacheFile(new URI(status.getPath().toString() + "#filelabel" + (i++)));
+				}
+			jobTwo.getConfiguration().setInt("FilesTotal", i);
 
-			job.addCacheFile(new URI ( "tempo"+ "/" + height + "#filelabel"));
+//			jobTwo.addCacheFile(new URI ( args[2]+ "/" + height + "#filelabel"));
 
 			jobTwo.waitForCompletion(true);
 
  			inputPath = new Path(args[1] +"/" +height +"/data");
             		height++;
             		outputPath = new Path(args[1] + "/" + height);
-            		tempOutput = new Path("tempo"+ "/" + height);
-
+            		tempOutput = new Path(args[2]+ "/" + height);
+			if(!fs.exists(inputPath)) {
+				break;
+			}
         	}
 
 		return 1;
 	}
 	public static void main(final String[] args) {
-		if (args.length != 2) {
+		if (args.length != 3) {
 			throw new Error("Two arguments required:\n<input-dir> <output-dir>");
         	}
 		

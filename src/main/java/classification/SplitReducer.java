@@ -48,7 +48,7 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
         rightMaxCountClass = -1;
         System.out.println("Just to check");
         parentChildren = new HashMap<>();
-
+        int total = Integer.parseInt(context.getConfiguration().get("FilesTotal"));
         //add
         parentSelectionAttr = new HashMap<>();
         URI[] cacheFiles = context.getCacheFiles();
@@ -57,22 +57,31 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
             throw new RuntimeException(
                     "User information is not set in DistributedCache");
         }
+        BufferedReader rdr = null;
         try
         {
-            BufferedReader rdr = new BufferedReader(new FileReader("filelabel"));
-            SelectedAttribute selectedAttribute;
-            String line;
-            // For each record in the user file
-            while ((line = rdr.readLine()) != null) {
-                String[] temp = line.split(",");
-                selectedAttribute = new SelectedAttribute(Integer.parseInt(temp[2]),
-                        Float.parseFloat(temp[1]));
-                parentSelectionAttr.put(Integer.parseInt(temp[0]), selectedAttribute);
+
+            for(int i=0; i < total; i++) {
+                rdr = new BufferedReader(new FileReader("filelabel" + i));
+                SelectedAttribute selectedAttribute;
+                String line;
+                // For each record in the user file
+                while ((line = rdr.readLine()) != null) {
+                    String[] temp = line.split(",");
+                    selectedAttribute = new SelectedAttribute(Integer.parseInt(temp[2]),
+                            Float.parseFloat(temp[1]));
+                    parentSelectionAttr.put(Integer.parseInt(temp[0]), selectedAttribute);
+                }
             }
 
+
         } catch (IOException e) {
+
             System.out.println("Some IO issue");
             throw new RuntimeException(e);
+        }
+        finally {
+            rdr.close();
         }
     }
 
@@ -81,6 +90,7 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
         int countClassOne = 0;
         int countClassZero = 0;
         int total = 0;
+
 
         int childId = -1;
         MarkableIterator<Text> mitr = new MarkableIterator<Text>(values.iterator());
@@ -96,6 +106,7 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
         else {
             parentNode = new Node();
             parentNode.setId(parentKey);
+            parentChildren.put(parentKey, parentNode);
         }
 
         parentNode.setAttribute(parentSelectionAttr.get(parentKey).getAk());
@@ -113,12 +124,16 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
             total+=1;
         }
 
-        if(key.toString().split(",")[1] == "1") {
+        System.out.println("key" + key.toString());
+
+        if(key.toString().split(",")[1].equals("1")) {
             childId = newId(parentKey, "left");
+            System.out.println("leftChild" + childId);
             parentNode.setLeftChild(childId);
         }
         else {
             childId = newId(parentKey, "right");
+            System.out.println("rightChild" + childId);
             parentNode.setRightChild(childId);
         }
 
@@ -126,6 +141,7 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
 
         int k = total == maxCount ? 1 : 2;
 
+        System.out.println("Someeee" + key.toString().split(",")[1]);
 
         if((maxCount/((float)total)) <= minProbability && total >= maxRecordsInPartition && k > 1) {
         mitr.reset();
@@ -139,7 +155,8 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
             }
         }
         else {
-            if(key.toString().split(",")[1] == "1") {
+            System.out.println("ttttttttttttttttt");
+            if(key.toString().split(",")[1].equals("1")) {
                 parentNode.setLeftFlag("true");
                 leftMaxCountClass = countClassOne > countClassZero? 1: 0;
                 parentNode.setLeftChild(leftMaxCountClass);
@@ -156,7 +173,9 @@ public class SplitReducer extends Reducer<Text, Text, Text, Text> {
     @Override
     public void cleanup(final Context context) throws IOException, InterruptedException {
         StringBuilder res;
+        System.out.println("Testttttttt");
         for (Map.Entry<Integer, Node> entry : parentChildren.entrySet()) {
+            System.out.println("innnnnnnnnn");
 
         res = new StringBuilder();
         res.append(entry.getValue().getAttribute() + "," + entry.getValue().getCutPoint() + ",");
