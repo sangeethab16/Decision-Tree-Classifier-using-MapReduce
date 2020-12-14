@@ -52,6 +52,7 @@ public class Driver extends Configured implements Tool {
 			job.setMapperClass(AttributeSelectionMapper.class);
 			job.setPartitionerClass(SplitPartitioner.class);
 			job.setReducerClass(SelectReducer.class);
+			job.setNumReduceTasks(2);
 
 			job.setMapOutputKeyClass(Text.class);
 			job.setMapOutputValueClass(SelectMapperWritable.class);
