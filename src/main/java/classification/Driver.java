@@ -6,6 +6,7 @@ import java.net.URI;
 
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.log4j.Logger;
@@ -89,9 +90,19 @@ public class Driver extends Configured implements Tool {
 			FileInputFormat.addInputPath(jobTwo, inputPath);
 			FileOutputFormat.setOutputPath(jobTwo, outputPath);
 
+			MultipleOutputs.addNamedOutput(jobTwo, "decision", TextOutputFormat.class, LongWritable.class, Text.class);
+			MultipleOutputs.addNamedOutput(jobTwo, "data", TextOutputFormat.class, NullWritable.class, Text.class);
+
+
+
 			int i = 0;
-				FileSystem fs = FileSystem.get(conf);
-				FileStatus[] fileStatus = fs.listStatus(new Path(args[2]+ "/" + height));
+
+			FileStatus[] fileStatus = FileSystem.get(new java.net.URI(args[2] +"/" + height),
+					new Configuration()).listStatus(new Path(args[2] +"/" + height ));
+
+
+
+//				FileStatus[] fileStatus = fs.listStatus(new Path(args[2]+ "/" + height));
 				for(FileStatus status : fileStatus){
 					jobTwo.addCacheFile(new URI(status.getPath().toString() + "#filelabel" + (i++)));
 				}
@@ -99,15 +110,14 @@ public class Driver extends Configured implements Tool {
 
 //			jobTwo.addCacheFile(new URI ( args[2]+ "/" + height + "#filelabel"));
 
+
 			jobTwo.waitForCompletion(true);
 
  			inputPath = new Path(args[1] +"/" +height +"/data");
             		height++;
             		outputPath = new Path(args[1] + "/" + height);
             		tempOutput = new Path(args[2]+ "/" + height);
-			if(!fs.exists(inputPath)) {
-				break;
-			}
+
         	}
 
 
